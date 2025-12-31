@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: dev-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: dev-flyway
+    depends_on:
+      - postgres
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/app_db
+      FLYWAY_USER: app_user
+      FLYWAY_PASSWORD: app_password
+    volumes:
+      - ./flyway/sql:/flyway/sql
+
+volumes:
+  pgdata:
