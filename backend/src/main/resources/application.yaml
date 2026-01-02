@@ -1,3 +1,9 @@
 spring:
-  application:
-    name: VenueXBackend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/venuex_db
+    username: postgres
+    password: password123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
