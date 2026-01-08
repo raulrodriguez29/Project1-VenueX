@@ -1,4 +1,7 @@
 package com.venuex.backend.repository;
 
-public class venueRepository {
+import com.venuex.backend.entities.venue;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface venueRepository extends JpaRepository<venue, Integer> {
 }
