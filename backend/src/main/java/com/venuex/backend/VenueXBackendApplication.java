@@ -2,17 +2,13 @@ package com.venuex.backend;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import com.venuex.backend.entities.*;
-import com.venuex.backend.repository.*;
+import com.venuex.backend.entities.Notification;
+import com.venuex.backend.repository.NotificationRepository;
 
 @SpringBootApplication
 public class VenueXBackendApplication {
@@ -24,9 +20,9 @@ public class VenueXBackendApplication {
 	}
 
 	@Bean
-	public CommandLineRunner demo(notificationRepository repo) {
+	public CommandLineRunner demo(NotificationRepository repo) {
 		return (args) -> {
-			notification newNotification = new notification();
+			Notification newNotification = new Notification();
 			newNotification.setUserId(1);
 			newNotification.setType("EMAIL");
 			newNotification.setMessage("I like notifications");

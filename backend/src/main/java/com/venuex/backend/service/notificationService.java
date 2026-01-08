@@ -2,33 +2,33 @@ package com.venuex.backend.service;
 
 import org.springframework.stereotype.Service;
 
-import com.venuex.backend.entities.notification;
-import com.venuex.backend.repository.notificationRepository;
+import com.venuex.backend.entities.Notification;
+import com.venuex.backend.repository.NotificationRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class notificationService {
-    private final notificationRepository repository;
+public class NotificationService {
+    private final NotificationRepository repository;
 
-    public notificationService(notificationRepository repository) {
+    public NotificationService(NotificationRepository repository) {
         this.repository = repository;
     }
 
-    public List<notification> getAllNotifications() {
+    public List<Notification> getAllNotifications() {
         return repository.findAll();
     }
 
-    public List<notification> getNotificationsByUserId(Integer userId) {
+    public List<Notification> getNotificationsByUserId(Integer userId) {
         return repository.findByUserId(userId);
     }
 
-    public Optional<notification> getNotificationById(Integer id) {
+    public Optional<Notification> getNotificationById(Integer id) {
         return repository.findById(id);
     }
 
-    public notification saveNotification(notification notification) {
+    public Notification saveNotification(Notification notification) {
         return repository.save(notification);
     }
 

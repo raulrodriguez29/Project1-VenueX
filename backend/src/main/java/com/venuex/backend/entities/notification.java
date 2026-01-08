@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "notifications")
-public class notification {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,11 +31,11 @@ public class notification {
     //private LocalDateTime sentAt = LocalDateTime.now();
 
     // Constructors
-    public notification() {
+    public Notification() {
 
     }
 
-    public notification(Integer userId, String type, String message) {
+    public Notification(Integer userId, String type, String message) {
         this.userId = userId;
         this.type = type;
         this.message = message;
