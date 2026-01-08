@@ -1,4 +1,8 @@
 package com.venuex.backend.entities;
 
-public class role {
+public enum role {
+    GUEST,
+    BASIC_USER,
+    ADMIN,
+    SUPER_USER
 }
