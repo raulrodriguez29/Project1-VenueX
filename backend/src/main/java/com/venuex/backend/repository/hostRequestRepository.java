@@ -1,4 +1,4 @@
 package com.venuex.backend.repository;
 
-public class hostRequestRepository {
+public class HostRequestRepository {
 }

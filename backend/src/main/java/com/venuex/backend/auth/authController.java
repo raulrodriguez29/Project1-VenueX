@@ -6,20 +6,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.venuex.backend.service.userService;
+import com.venuex.backend.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
-public class authController {
+public class AuthController {
 
-    private final userService UserService;
+    private final UserService UserService;
 
-    public authController(userService UserService) {
+    public AuthController(UserService UserService) {
         this.UserService = UserService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody authDTO request) {
+    public ResponseEntity<?> register(@RequestBody AuthDTO request) {
         //UserService.register(request);
         return ResponseEntity.ok("User registered successfully");
     }

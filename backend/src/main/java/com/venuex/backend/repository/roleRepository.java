@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.venuex.backend.entities.role;
+import com.venuex.backend.entities.Role;
 
 @Repository
-public interface roleRepository extends JpaRepository<role, Integer> {
+public interface RoleRepository extends JpaRepository<Role, Integer> {
 
-    Optional<role> findByRoleName(String type);
+    Optional<Role> findByRoleName(String type);
 }
 

@@ -1,4 +1,4 @@
 package com.venuex.backend.controller;
 
-public class hostController {
+public class HostController {
 }

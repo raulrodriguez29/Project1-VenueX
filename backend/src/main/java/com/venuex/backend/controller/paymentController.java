@@ -1,4 +1,4 @@
 package com.venuex.backend.controller;
 
-public class paymentController {
+public class PaymentController {
 }

@@ -1,4 +1,4 @@
 package com.venuex.backend.service;
 
-public class eventService {
+public class EventService {
 }

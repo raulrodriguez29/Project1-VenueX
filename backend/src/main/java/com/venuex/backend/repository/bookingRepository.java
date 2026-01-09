@@ -1,4 +1,4 @@
 package com.venuex.backend.repository;
 
-public class bookingRepository {
+public class BookingRepository {
 }

@@ -1,4 +1,4 @@
 package com.venuex.backend.config;
 
-public class appConfig {
+public class AppConfig {
 }

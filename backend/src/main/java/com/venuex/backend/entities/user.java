@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name="users")
-public class user {
-    @ID
+public class User {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -33,9 +33,9 @@ public class user {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
-    public user(Integer id, String email, String password_hash, String first_name, String last_name, String phone) {
+    public User(Integer id, String email, String password_hash, String first_name, String last_name, String phone) {
         this.id = id;
         this.email = email;
         this.password_hash = password_hash;
@@ -44,7 +44,7 @@ public class user {
         this.phone = phone;
     }
 
-    public user() {
+    public User() {
     }
 
     public int getID() {
@@ -95,7 +95,7 @@ public class user {
         this.phone = phone;
     }
 
-    public Set<role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 

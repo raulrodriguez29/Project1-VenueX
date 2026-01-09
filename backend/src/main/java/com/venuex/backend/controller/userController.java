@@ -12,40 +12,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.venuex.backend.entities.user;
-import com.venuex.backend.service.userService;
+import com.venuex.backend.entities.User;
+import com.venuex.backend.service.UserService;
 
 @RestController
 @RequestMapping("/users")
-public class userController {
+public class UserController {
 
-    private final userService UserService;
+    private final UserService UserService;
 
-    public userController(userService UserService) {
+    public UserController(UserService UserService) {
         this.UserService = UserService;
     }
 
     // CREATE
     @PostMapping
-    public ResponseEntity<user> createUser(@RequestBody user User) {
+    public ResponseEntity<User> createUser(@RequestBody User User) {
         return ResponseEntity.ok(UserService.createUser(User));
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<user>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(UserService.getAllUsers());
     }
 
     // READ ONE
     @GetMapping("/{id}")
-    public ResponseEntity<user> getUser(@PathVariable Integer id) {
+    public ResponseEntity<User> getUser(@PathVariable Integer id) {
         return ResponseEntity.ok(UserService.getUserById(id));
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<user> updateUser(@PathVariable Integer id, @RequestBody user User) {
+    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User User) {
         return ResponseEntity.ok(UserService.updateUser(id, User));
     }
 

@@ -1,4 +1,4 @@
 package com.venuex.backend.entities;
 
-public class eventSeatSection {
+public class EventSeatSection {
 }

@@ -1,4 +1,4 @@
 package com.venuex.backend.entities;
 
-public class event {
+public class Event {
 }

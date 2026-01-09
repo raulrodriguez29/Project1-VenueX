@@ -1,4 +1,4 @@
 package com.venuex.backend.service;
 
-public class bookingService {
+public class BookingService {
 }

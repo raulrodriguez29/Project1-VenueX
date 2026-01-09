@@ -1,4 +1,4 @@
 package com.venuex.backend.DTO;
 
-public class notificationDTO {
+public class NotificationDTO {
 }
