@@ -12,10 +12,10 @@ import com.venuex.backend.service.UserService;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UserService UserService;
+    private final UserService userService;
 
-    public AuthController(UserService UserService) {
-        this.UserService = UserService;
+    public AuthController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping("/register")
