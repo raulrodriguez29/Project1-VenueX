@@ -1,5 +1,7 @@
 package com.venuex.backend.entities;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +17,8 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    //add @ManytoOne
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "user_id", nullable = false)
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
@@ -25,19 +28,20 @@ public class Notification {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    //@Column(name = "sent_at", columnDefinition = "TIMESTAMP")
-    //private LocalDateTime sentAt = LocalDateTime.now();
+    @Column(name = "sent_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime sentAt = LocalDateTime.now();
 
     // Constructors
     public Notification() {
 
     }
 
-    public Notification(Integer userId, String type, String message) {
+    public Notification(Integer id, Integer userId, String type, String message) {
+        this.id = id;
         this.userId = userId;
         this.type = type;
         this.message = message;
-        //this.sentAt = LocalDateTime.now();
+        this.sentAt = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -70,9 +74,9 @@ public class Notification {
         this.message = message;
     }
 
-    //public LocalDateTime getSentAt() {
-        //return sentAt; 
-    //}
+    public LocalDateTime getSentAt() {
+        return sentAt; 
+    }
 
     //public void setSentAt(LocalDateTime sentAt) {
         //this.sentAt = sentAt; 
