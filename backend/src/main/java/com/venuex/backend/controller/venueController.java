@@ -6,27 +6,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import com.venuex.backend.entities.venue;
-import com.venuex.backend.service.venueService;
+import com.venuex.backend.entities.Venue;
+import com.venuex.backend.service.VenueService;
 import java.util.List;
 
 @RestController
 @RequestMapping("/venues")
-public class venueController {
-    private final venueService venueservice;
+public class VenueController {
+    private final VenueService venueService;
 
-    public venueController (venueService venueservice) {
-        this.venueservice = venueservice;
+    public VenueController (VenueService venueService) {
+        this.venueService = venueService;
     }
     
     @GetMapping
-    public List<venue> getAllVenues() {
-        return venueservice.getAllVenues();
+    public List<Venue> getAllVenues() {
+        return venueService.getAllVenues();
     }
 
     @GetMapping("/{id}")
-    public venue getVenueById(@PathVariable Integer id) {
-        return venueservice.findById(id);
+    public Venue getVenueById(@PathVariable Integer id) {
+        return venueService.findById(id);
     }
 
 }

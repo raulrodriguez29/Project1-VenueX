@@ -1,23 +1,26 @@
 package com.venuex.backend.service;
 
-import com.venuex.backend.entities.venue;
-import com.venuex.backend.repository.venueRepository;
+import com.venuex.backend.entities.Venue;
+import com.venuex.backend.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
-public class venueService {
-    private final venueRepository venuerepository;
+public class VenueService {
+    private final VenueRepository venueRepository;
 
-    public venueService (venueRepository venuerepository) {
-        this.venuerepository = venuerepository;
+    public VenueService (VenueRepository venueRepository) {
+        this.venueRepository = venueRepository;
     }
 
-    public List<venue> getAllVenues() {
-        return venuerepository.findAll();
+    public List<Venue> getAllVenues() {
+        return venueRepository.findAll();
     }
 
-    public venue findById(Integer id) {
-        return venuerepository.findById(id).orElse(null);
+    public Venue findById(Integer id) {
+        return venueRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Venue not found"));
     }
+
+    //create, upodate, delete only by Admins 
 }

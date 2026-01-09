@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "venues")
-public class venue {
+public class Venue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,16 +14,16 @@ public class venue {
     private String name;
 
     @Column(name = "location_id")
-    private String Location;
+    private String location;
 
     @Column(name = "venue_desc", columnDefinition = "TEXT")
     private String venueDescription;
 
     //constructors (only admins can add venues)
-    public venue() {}
-    public venue(String name, String location, String description){
+    public Venue() {}
+    public Venue(String name, String location, String description){
         this.name = name;
-        this.Location = location;
+        this.location = location;
         this.venueDescription = description;
     }
 
@@ -37,7 +37,7 @@ public class venue {
     }
 
     public String getLocation() {
-        return Location;
+        return location;
     }
 
     public String getDescription() {
@@ -50,11 +50,10 @@ public class venue {
     }
 
     public void setLocation(String location) {
-        this.Location = location;
+        this.location = location;
     }
 
     public void setDescription(String description) {
         this.venueDescription = description;
     }
-
 }
