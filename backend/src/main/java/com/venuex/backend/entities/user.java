@@ -1,13 +1,13 @@
-package com.venuex.backend.entities;
+package com.venuex.backend.entities; 
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.HashSet; 
+import java.util.Set; 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -16,17 +16,16 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
-    private String password_hash;
-    
-    @Column(name = "first_name")
-    private String first_name;
+    private String passwordHash;
 
-     @Column(name = "last_name")
-    private String last_name;
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     private String phone;
 
-    // Roles (many-to-many)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
@@ -35,23 +34,21 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    public User(Integer id, String email, String password_hash, String first_name, String last_name, String phone) {
-        this.id = id;
+    public User() {}
+
+    public User(String email, String passwordHash, String firstName, String lastName, String phone) {
         this.email = email;
-        this.password_hash = password_hash;
-        this.first_name = first_name;
-        this.last_name = last_name;
+        this.passwordHash = passwordHash;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.phone = phone;
     }
 
-    public User() {
-    }
-
-    public int getID() {
+    public Integer getId() {
         return id;
     }
 
-    public void setID(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -63,28 +60,28 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword_hash() {
-        return password_hash;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPhone() {
@@ -99,7 +96,8 @@ public class User {
         return roles;
     }
 
-    public void setRoles(int id) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 }
+
