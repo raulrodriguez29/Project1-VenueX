@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.venuex.backend.entities.notification;
+import com.venuex.backend.entities.Notification;
 
-public interface NotificationRepository extends JpaRepository<notification, Integer>{
+public interface NotificationRepository extends JpaRepository<Notification, Integer>{
 
-    List<notification> findByUserId(Integer userId);
+    List<Notification> findByUserId(Integer userId);
 
 
 }
