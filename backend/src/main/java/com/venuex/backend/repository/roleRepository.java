@@ -10,6 +10,6 @@ import com.venuex.backend.entities.Role;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
-    Optional<Role> findByRoleName(String type);
+    Optional<Role> findByRoleName(String roleName);
 }
 

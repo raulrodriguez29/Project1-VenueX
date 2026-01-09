@@ -9,7 +9,7 @@ public class Role {
     private Integer id;
 
     @Column(name = "role_name", unique = true, nullable = false)
-    private String type; //GUEST, USER, HOST, ADMIN, SUPER_ADMIN
+    private String roleName; //GUEST, USER, HOST, ADMIN, SUPER_ADMIN
 
     // Add getters & setters
     public int getID() {
@@ -21,10 +21,10 @@ public class Role {
     }
 
     public String getType() {
-        return type;
+        return roleName;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(String roleName) {
+        this.roleName = roleName;
     }
 }

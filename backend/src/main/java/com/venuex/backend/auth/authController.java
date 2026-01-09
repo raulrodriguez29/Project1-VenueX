@@ -22,6 +22,6 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody AuthDTO request) {
         //UserService.register(request);
         return ResponseEntity.ok("User registered successfully");
-    }
+    }   
 }
 
