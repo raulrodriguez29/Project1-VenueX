@@ -19,40 +19,40 @@ import com.venuex.backend.service.UserService;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService UserService;
+    private final UserService userService;
 
-    public UserController(UserService UserService) {
-        this.UserService = UserService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     // CREATE
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User User) {
-        return ResponseEntity.ok(UserService.createUser(User));
+        return ResponseEntity.ok(userService.createUser(User));
     }
 
     // READ ALL
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(UserService.getAllUsers());
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Integer id) {
-        return ResponseEntity.ok(UserService.getUserById(id));
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User User) {
-        return ResponseEntity.ok(UserService.updateUser(id, User));
+        return ResponseEntity.ok(userService.updateUser(id, User));
     }
 
     // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
-        UserService.deleteUser(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 }

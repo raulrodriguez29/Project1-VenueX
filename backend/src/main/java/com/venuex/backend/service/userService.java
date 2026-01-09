@@ -1,6 +1,5 @@
 package com.venuex.backend.service;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,66 +13,66 @@ import com.venuex.backend.repository.UserRepository;
 @Service
 public class UserService {
 
-    private final UserRepository UserRepository;
-    private final RoleRepository RoleRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository UserRepository, RoleRepository RoleRepository, PasswordEncoder passwordEncoder) {
-        this.UserRepository = UserRepository;
-        this.RoleRepository = RoleRepository;
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     // CREATE
-    public User createUser(User User) {
-        if (UserRepository.existsByEmail(User.getEmail())) {
+    public User createUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-        User.setPassword_hash(passwordEncoder.encode(User.getPassword_hash()));
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
 
-        Role userRole = RoleRepository.findByRoleName("USER")
+        Role userRole = roleRepository.findByRoleName("USER")
             .orElseThrow(() -> new RuntimeException("USER role not found"));
 
-        User.getRoles().add(userRole);
+        user.getRoles().add(userRole);
 
-        return UserRepository.save(User);
+        return userRepository.save(user);
     }
 
     // READ (by id)
     public User getUserById(Integer id) {
-        return UserRepository.findById(id)
+        return userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     // READ (all)
     public List<User> getAllUsers() {
-        return UserRepository.findAll();
+        return userRepository.findAll();
     }
 
     // UPDATE
     public User updateUser(Integer id, User updatedUser) {
         User existing = getUserById(id);
 
-        existing.setFirst_name(updatedUser.getFirst_name());
-        existing.setLast_name(updatedUser.getLast_name());
+        existing.setFirstName(updatedUser.getFirstName());
+        existing.setLastName(updatedUser.getLastName());
         existing.setPhone(updatedUser.getPhone());
 
-        return UserRepository.save(existing);
+        return userRepository.save(existing);
     }
 
     // UPDATE PASSWORD
     public void updatePassword(Integer id, String newPassword) {
         User User = getUserById(id);
-        User.setPassword_hash(passwordEncoder.encode(newPassword));
-        UserRepository.save(User);
+        User.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(User);
     }
 
     // DELETE
     public void deleteUser(Integer id) {
-        if (!UserRepository.existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found");
         }
-        UserRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 }
