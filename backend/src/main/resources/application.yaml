@@ -7,3 +7,8 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+app:
+  jwt:
+    secret: "our-very-secure-and-very-long-secret-key-at-least-32-chars-long"
+    expiration-ms: 86400000 # 24 hours
