@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Register from './pages/auth/Register';
 import { useEffect, useState } from 'react'
-import apiClient from './api/apiClient'
+import apiClient from './services/apiClient'
 import './App.css'
 
 function App() {
