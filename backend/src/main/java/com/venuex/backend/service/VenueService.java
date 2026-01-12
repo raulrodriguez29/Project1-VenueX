@@ -98,7 +98,10 @@ public class VenueService {
         return seatSectionRepository.saveAll(existingSections);
     }
 
-    public void deleteSeatSections(Integer seatSectionId) {
+    public void deleteSeatSections(Integer venueId, Integer seatSectionId) {
+        venueRepository.findById(venueId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
+
         SeatSection existing = seatSectionRepository.findById(seatSectionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat section not found"));
     

@@ -28,9 +28,6 @@ public class JwtFilter implements Filter{
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
 
-        // DEBUG: Look at your console to see exactly what this prints!
-        System.out.println("JWT Filter checking path: " + path);
-
         // Whitelist
         if (whiteList.contains(path)) {
         chain.doFilter(request, response);
@@ -58,14 +55,14 @@ public class JwtFilter implements Filter{
                 }
 
                 // Host Routes
-                if (path.startsWith("/api/venues/manage") && !(role.equals("HOST") || role.equals("ADMIN"))) {
+                if (path.startsWith("/api/host") && !(role.equals("HOST") || role.equals("ADMIN"))) {
                     httpResponse.setStatus(403);
                     httpResponse.getWriter().write("Access Denied: Host or Admin role required");
                     return;
                 }
 
                 // Standard User Routes
-                if (path.startsWith("/api/user/") && role.equals("GUEST")) {
+                if (path.startsWith("/api/user") && role.equals("GUEST")) {
                     httpResponse.setStatus(403);
                     httpResponse.getWriter().write("Access Denied: Please register an account");
                     return;
