@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import apiClient from '../../api/apiClient';
+import apiClient from '../../services/apiClient';
 
 const Register = () => {
     const [formData, setFormData] = useState({
