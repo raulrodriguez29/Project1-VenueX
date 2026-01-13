@@ -140,7 +140,7 @@ public class VenueServiceTest {
     }
 
     @Test
-    void updateVenue_Faulire_NotFound() {
+    void updateVenue_Failure_NotFound() {
 
         Venue updated = new Venue();
         updated.setName("New Stadium");
