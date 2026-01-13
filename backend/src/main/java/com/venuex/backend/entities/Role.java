@@ -1,5 +1,10 @@
 package com.venuex.backend.entities;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "roles")
@@ -10,6 +15,14 @@ public class Role {
 
     @Column(name = "role_name", unique = true, nullable = false)
     private String roleName; //GUEST, USER, HOST, ADMIN, SUPER_ADMIN
+
+    public Role() {
+    }
+
+    public Role(Integer id, String roleName) {
+        this.id = id;
+        this.roleName = roleName;
+    }
 
     // Add getters & setters
     public int getID() {
