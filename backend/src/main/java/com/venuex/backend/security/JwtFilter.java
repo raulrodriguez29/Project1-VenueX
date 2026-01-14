@@ -1,12 +1,18 @@
 package com.venuex.backend.security;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtFilter implements Filter{
@@ -14,7 +20,14 @@ public class JwtFilter implements Filter{
     private final JwtUtil jwtUtil;
 
     //List of URLs that don't need a token
-    private final List<String> whiteList = Arrays.asList("/api/auth/login", "/api/auth/register");
+    private final List<String> whiteList = Arrays.asList("/api/auth/login",
+        "/api/auth/register",
+        "/api/venues",
+        "/api/venues/",
+        "/api/events",
+        "/api/events/",
+        "/api/notifications",
+        "/api/notifications/");
 
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
