@@ -10,6 +10,7 @@ import com.venuex.backend.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 @Service
 public class VenueService {
     private final VenueRepository venueRepository;
@@ -77,34 +78,23 @@ public class VenueService {
         return seatSectionRepository.saveAll(sections);
     }
 
-    public List<SeatSection> updateSeatSections(Integer venueId, List<SeatSection> sections) {
-        venueRepository.findById(venueId)
+    public List<SeatSection> updateSeatSections(Integer venueId, Map<String, Integer> capacities) {
+         venueRepository.findById(venueId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
-        
-        List<SeatSection> existingSections =
-        seatSectionRepository.findByVenueId(venueId);
 
-        if (existingSections.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat sections not found for venue");
+        List<SeatSection> sections = seatSectionRepository.findByVenueId(venueId);
+        if (sections.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No seat sections found for venue");
         }
-
-        for (SeatSection incoming : sections) {
-            for (SeatSection existing : existingSections) {
-                if (existing.getType().equals(incoming.getType())) {
-                    existing.setCapacity(incoming.getCapacity());
+        for (SeatSection section : sections) {
+            Integer newCapacity = capacities.get(section.getType());
+            if (newCapacity != null) {
+                if (newCapacity <= 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Capacity must be greater than 0");
                 }
+                section.setCapacity(newCapacity);
             }
         }
-        return seatSectionRepository.saveAll(existingSections);
-    }
-
-    public void deleteSeatSections(Integer venueId, Integer seatSectionId) {
-        venueRepository.findById(venueId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
-
-        SeatSection existing = seatSectionRepository.findById(seatSectionId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat section not found"));
-    
-        seatSectionRepository.delete(existing);
+        return seatSectionRepository.saveAll(sections);
     }
 }

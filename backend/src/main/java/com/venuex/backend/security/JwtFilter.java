@@ -14,7 +14,12 @@ public class JwtFilter implements Filter{
     private final JwtUtil jwtUtil;
 
     //List of URLs that don't need a token
-    private final List<String> whiteList = Arrays.asList("/api/auth/login", "/api/auth/register");
+    private final List<String> whiteList = Arrays.asList("/api/auth/login",
+        "/api/auth/register",
+        "/api/venues",
+        "/api/venues/",
+        "/api/events",
+        "/api/events/");
 
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;

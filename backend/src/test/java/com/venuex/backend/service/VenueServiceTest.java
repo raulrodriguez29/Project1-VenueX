@@ -2,12 +2,16 @@ package com.venuex.backend.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +45,7 @@ public class VenueServiceTest {
     SeatSection seatSectionPremium;
     SeatSection setSeatSectionFloor;
     SeatSection seatSectionGeneral;
+    List<SeatSection> seatSectionList;
 
     @BeforeEach
     void setup() {
@@ -50,10 +55,16 @@ public class VenueServiceTest {
         venue.setLocation("Plano TX");
         venue.setDescription("Place in Plano");
 
-        seatSectionVIP = new SeatSection("VIP", 5, venue);
-        seatSectionPremium = new SeatSection("Premium", 10, venue);
-        setSeatSectionFloor = new SeatSection("Floor", 15, venue);
-        seatSectionGeneral = new SeatSection("General", 20, venue);
+        seatSectionVIP = new SeatSection(1,"VIP", 5, venue);
+        seatSectionPremium = new SeatSection(1,"Premium", 10, venue);
+        setSeatSectionFloor = new SeatSection(1,"Floor", 15, venue);
+        seatSectionGeneral = new SeatSection(1,"General", 20, venue);
+
+        seatSectionList = new ArrayList<>();
+        seatSectionList.add(seatSectionGeneral);
+        seatSectionList.add(setSeatSectionFloor);
+        seatSectionList.add(seatSectionPremium);
+        seatSectionList.add(seatSectionVIP);
     }
 
     @Test
@@ -192,5 +203,71 @@ public class VenueServiceTest {
 
         verify(venueRepository, times(1)).findById(1);
         verify(venueRepository, never()).delete(any());
+    }
+
+    @Test
+    void getVenueSeatSections_existingVenue_returnsSections() {
+        when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
+        when(seatSectionRepository.findByVenueId(1)).thenReturn(seatSectionList);
+
+        List<SeatSection> sections = venueService.getVenueSeatSections(1);
+
+        assertEquals(4, sections.size());
+        verify(seatSectionRepository).findByVenueId(1);
+    }
+
+    @Test
+    void getVenueSeatSections_nonExistingVenue_throwsNotFound() {
+        when(venueRepository.findById(1)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            venueService.getVenueSeatSections(1));
+
+        assertEquals("404 NOT_FOUND \"Venue not found\"", exception.getMessage());
+    }
+
+    @Test
+    void createSeatSections_validSections_returnsSaved() {
+        List<SeatSection> sectionsToCreate = seatSectionList;
+
+        when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
+        when(seatSectionRepository.saveAll(sectionsToCreate)).thenReturn(sectionsToCreate);
+
+        List<SeatSection> savedSections = venueService.createSeatSections(1, sectionsToCreate);
+
+        assertEquals(4, savedSections.size());
+        assertEquals("VIP", savedSections.get(3).getType());
+        assertEquals(1, savedSections.get(2).getVenue().getId());
+        verify(seatSectionRepository).saveAll(sectionsToCreate);
+    }
+
+    @Test
+    void updateSeatSections_validUpdate_changesCapacity() {
+        Map<String, Integer> capacities = new HashMap<>();
+        capacities.put("VIP", 150);
+        capacities.put("General", 250);
+
+        when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
+        when(seatSectionRepository.findByVenueId(1)).thenReturn(seatSectionList);
+        when(seatSectionRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<SeatSection> updatedSections = venueService.updateSeatSections(1, capacities);
+
+        assertEquals(150, updatedSections.get(3).getCapacity());
+        assertEquals(250, updatedSections.get(0).getCapacity());
+        verify(seatSectionRepository).saveAll(anyList());
+    }
+
+    @Test
+    void updateSeatSections_nonExistingVenue_throwsNotFound() {
+        when(venueRepository.findById(1)).thenReturn(Optional.empty());
+
+        Map<String, Integer> capacities = new HashMap<>();
+        capacities.put("VIP", 100);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            venueService.updateSeatSections(1, capacities));
+
+        assertEquals("404 NOT_FOUND \"Venue not found\"", exception.getMessage());
     }
 }
