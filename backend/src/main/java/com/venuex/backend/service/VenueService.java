@@ -33,9 +33,12 @@ public class VenueService {
 
     //create, update, delete only by ADMINS
     public Venue createVenue(Venue venue) {
-        if (venueRepository.existsByName(venue.getName())) {
+        if (venueRepository.existsByName(venue.getName().toLowerCase())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
         }
+        if (venue.getName() != null) venue.setName(venue.getName().toLowerCase());
+        if (venue.getLocation() != null) venue.setLocation(venue.getLocation().toLowerCase());
+        if (venue.getDescription() != null) venue.setDescription(venue.getDescription().toLowerCase());
         return venueRepository.save(venue);
     }
 
@@ -43,14 +46,21 @@ public class VenueService {
         Venue existingVenue = venueRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
 
-        if (!existingVenue.getName().equals(updatedVenue.getName())
-                && venueRepository.existsByName(updatedVenue.getName())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
-        }
+        if (updatedVenue.getName() != null) {
+            String newName = updatedVenue.getName().toLowerCase();
 
-        existingVenue.setName(updatedVenue.getName());
-        existingVenue.setLocation(updatedVenue.getLocation());
-        existingVenue.setDescription(updatedVenue.getDescription());
+            if (!existingVenue.getName().equals(newName) && venueRepository.existsByName(newName)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
+            }
+            existingVenue.setName(newName);
+        }
+        
+        if (updatedVenue.getLocation() != null) {
+            existingVenue.setLocation(updatedVenue.getLocation().toLowerCase());
+        }
+        if (updatedVenue.getDescription() != null) {
+            existingVenue.setDescription(updatedVenue.getDescription().toLowerCase());
+        }
 
         return venueRepository.save(existingVenue);
     }

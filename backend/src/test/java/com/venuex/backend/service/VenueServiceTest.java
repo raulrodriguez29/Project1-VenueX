@@ -3,10 +3,7 @@ package com.venuex.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,9 +48,9 @@ public class VenueServiceTest {
     void setup() {
         venue = new Venue();
         venue.setId(1);
-        venue.setName("Stadium");
-        venue.setLocation("Plano TX");
-        venue.setDescription("Place in Plano");
+        venue.setName("stadium");
+        venue.setLocation("plano");
+        venue.setDescription("place in plano");
 
         seatSectionVIP = new SeatSection(1,"VIP", 5, venue);
         seatSectionPremium = new SeatSection(1,"Premium", 10, venue);
@@ -73,9 +70,9 @@ public class VenueServiceTest {
         when(venueRepository.findAll()).thenReturn(venues);
         List<Venue> result = venueService.getAllVenues();
         assertEquals(1, result.size());
-        assertEquals("Stadium", result.get(0).getName());
-        assertEquals("Plano TX", result.get(0).getLocation());
-        assertEquals("Place in Plano", result.get(0).getDescription());
+        assertEquals("stadium", result.get(0).getName());
+        assertEquals("plano", result.get(0).getLocation());
+        assertEquals("place in plano", result.get(0).getDescription());
         verify(venueRepository, times(1)).findAll();
     }
 
@@ -92,9 +89,9 @@ public class VenueServiceTest {
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
         Venue result = venueService.findById(1);
         assertEquals(1, result.getId());
-        assertEquals("Stadium", result.getName());
-        assertEquals("Plano TX", result.getLocation());
-        assertEquals("Place in Plano", result.getDescription());
+        assertEquals("stadium", result.getName());
+        assertEquals("plano", result.getLocation());
+        assertEquals("place in plano", result.getDescription());
         verify(venueRepository, times(1)).findById(1);
     }
 
@@ -112,9 +109,9 @@ public class VenueServiceTest {
         when(venueRepository.existsByName(venue.getName())).thenReturn(false);
         when(venueRepository.save(venue)).thenReturn(venue);
         Venue result = venueService.createVenue(venue);
-        assertEquals("Stadium", result.getName());
-        assertEquals("Plano TX", result.getLocation());
-        assertEquals("Place in Plano", result.getDescription());
+        assertEquals("stadium", result.getName());
+        assertEquals("plano TX", result.getLocation());
+        assertEquals("place in Plano", result.getDescription());
         verify(venueRepository, times(1)).existsByName(venue.getName());
         verify(venueRepository, times(1)).save(venue);
     }
@@ -132,21 +129,21 @@ public class VenueServiceTest {
     @Test
     void updateVenue_Success_ReturnUpdatedVenue() {
         Venue updated = new Venue();
-        updated.setName("New Stadium");
-        updated.setLocation("Dallas TX");
-        updated.setDescription("Located at Dallas");
+        updated.setName("new stadium");
+        updated.setLocation("dallas");
+        updated.setDescription("located at dallas");
 
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
-        when(venueRepository.existsByName("New Stadium")).thenReturn(false);
+        when(venueRepository.existsByName("new stadium")).thenReturn(false);
         when(venueRepository.save(venue)).thenReturn(venue);
         Venue result = venueService.updateVenue(1, updated);
 
-        assertEquals("New Stadium", result.getName());
-        assertEquals("Dallas TX", result.getLocation());
-        assertEquals("Located at Dallas", result.getDescription());
+        assertEquals("new stadium", result.getName());
+        assertEquals("dallas", result.getLocation());
+        assertEquals("located at dallas", result.getDescription());
 
         verify(venueRepository, times(1)).findById(1);
-        verify(venueRepository, times(1)).existsByName("New Stadium");
+        verify(venueRepository, times(1)).existsByName("new stadium");
         verify(venueRepository, times(1)).save(venue);
     }
 
@@ -154,7 +151,7 @@ public class VenueServiceTest {
     void updateVenue_Faulire_NotFound() {
 
         Venue updated = new Venue();
-        updated.setName("New Stadium");
+        updated.setName("new stadium");
 
         when(venueRepository.findById(1)).thenReturn(Optional.empty());
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,() -> venueService.updateVenue(1, updated));
@@ -169,10 +166,10 @@ public class VenueServiceTest {
     @Test
     void updateVenue_Failure_NameConflict() {
         Venue updated = new Venue();
-        updated.setName("New Stadium");
+        updated.setName("new stadium");
 
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
-        when(venueRepository.existsByName("New Stadium")).thenReturn(true);
+        when(venueRepository.existsByName("new stadium")).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,() -> venueService.updateVenue(1, updated));
 
@@ -180,7 +177,7 @@ public class VenueServiceTest {
         assertEquals("Venue already exists", exception.getReason());
 
         verify(venueRepository, times(1)).findById(1);
-        verify(venueRepository, times(1)).existsByName("New Stadium");
+        verify(venueRepository, times(1)).existsByName("new stadium");
         verify(venueRepository, never()).save(any());
     }
 

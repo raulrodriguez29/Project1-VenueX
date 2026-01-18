@@ -10,5 +10,5 @@ import com.venuex.backend.entities.EventSeatSection;
 @Repository
 public interface EventSeatSectionRepository extends JpaRepository<EventSeatSection, Integer> {
 
-    List<EventSeatSection> findByEventId(Integer eventId);
+    List<EventSeatSection> findByEvent_Id(Integer eventId);
 }

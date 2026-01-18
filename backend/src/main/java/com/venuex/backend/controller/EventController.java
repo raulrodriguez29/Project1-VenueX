@@ -1,9 +1,7 @@
 package com.venuex.backend.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +11,8 @@ import com.venuex.backend.entities.Event;
 import com.venuex.backend.service.EventService;
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
+@RequestMapping("/temp")
 public class EventController {
     private final EventService eventService;
 
@@ -23,11 +22,9 @@ public class EventController {
 
     @GetMapping("/events")
     public List<EventDTO> getEvents(
-        @RequestParam(required = false) Long venueId,
-        @RequestParam(required = false) String name,
-        @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate) {
-        return eventService.getEvents(venueId, name, startDate);
+        @RequestParam(required = false) Integer venueId,
+        @RequestParam(required = false) String name) {
+        return eventService.getEvents(venueId, name);
     }
 
     @GetMapping("/events/{id}")
@@ -62,5 +59,11 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public void addEventSeatSectionPrices (@PathVariable Integer id, @RequestBody List<EventSeatSectionDTO> eventSeatSections) {
         eventService.addEventSeatSectionPrices(id, eventSeatSections);
+    }
+
+    @PutMapping("/host/events/{id}/event-seat-section")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EventSeatSectionDTO> updateEventSeatSectionPrices (@PathVariable Integer id, @RequestBody List<EventSeatSectionDTO> eventSeatSections) {
+        return eventService.updateEventSeatSectionPrices(id, eventSeatSections);
     }
 }

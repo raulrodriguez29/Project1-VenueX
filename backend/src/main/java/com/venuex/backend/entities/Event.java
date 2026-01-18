@@ -2,6 +2,7 @@ package com.venuex.backend.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Event {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(columnDefinition = "TEXT")
@@ -32,11 +33,11 @@ public class Event {
     private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private String status;
+    private String status = "OPEN"; 
 
     // One event can have multiple seat sections
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventSeatSection> seatSections;
+    private List<EventSeatSection> seatSections = new ArrayList<>();
 
     public Integer getId() {
         return id;
