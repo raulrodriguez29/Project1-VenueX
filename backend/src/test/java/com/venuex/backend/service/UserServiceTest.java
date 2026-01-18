@@ -22,7 +22,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.venuex.backend.entities.Role;
 import com.venuex.backend.entities.User;
@@ -83,10 +85,11 @@ public class UserServiceTest { //tests per method are organized alphabetically
     void createUser_Failure_EmailInUse() {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, 
             () -> userService.createUser(user));
 
-        assertEquals("Email already in use", exception.getMessage());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Email already in use", exception.getReason());
 
         verify(userRepository, times(1)).existsByEmail(user.getEmail());
         verify(userRepository, never()).save(any());
@@ -96,10 +99,11 @@ public class UserServiceTest { //tests per method are organized alphabetically
     void createUser_Failure_UserRoleNotFound() {
         when(roleRepository.findByRoleName("USER")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, 
             () -> userService.createUser(user));
 
-        assertEquals("USER role not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("USER role not found", exception.getReason());
 
         verify(roleRepository, times(1)).findByRoleName("USER");
         verify(userRepository, never()).save(any());
@@ -120,10 +124,11 @@ public class UserServiceTest { //tests per method are organized alphabetically
     void deleteUser_Failure_UserNotFound() {
         when(userRepository.existsById(user.getId())).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, 
             () -> userService.deleteUser(user.getId()));
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("User not found", exception.getReason());
 
         verify(userRepository, times(1)).existsById(user.getId());
         verify(userRepository, never()).delete(user);
@@ -169,10 +174,11 @@ public class UserServiceTest { //tests per method are organized alphabetically
     void getUserById_Failure_NotFound() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
             () -> userService.getUserById(user.getId()));
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("User not found", exception.getReason());
         
         verify(userRepository, times(1)).findById(user.getId());
     }

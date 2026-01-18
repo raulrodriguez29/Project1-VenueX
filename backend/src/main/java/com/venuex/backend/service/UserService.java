@@ -2,8 +2,10 @@ package com.venuex.backend.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.venuex.backend.entities.Role;
 import com.venuex.backend.entities.User;
@@ -26,13 +28,13 @@ public class UserService {
     // CREATE
     public User createUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
 
         user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
 
         Role userRole = roleRepository.findByRoleName("USER")
-            .orElseThrow(() -> new RuntimeException("USER role not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "USER role not found"));
 
         user.getRoles().add(userRole);
 
@@ -42,7 +44,7 @@ public class UserService {
     // READ (by id)
     public User getUserById(Integer id) {
         return userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     // READ (all)
@@ -73,7 +75,7 @@ public class UserService {
     // DELETE
     public void deleteUser(Integer id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         userRepository.deleteById(id);
     }
