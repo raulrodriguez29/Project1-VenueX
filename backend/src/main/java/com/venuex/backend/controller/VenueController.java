@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-//@RequestMapping("/api")
-@RequestMapping("/temp")
+@RequestMapping("/api")
 public class VenueController {
     private final VenueService venueService;
 

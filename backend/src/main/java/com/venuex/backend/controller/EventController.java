@@ -11,8 +11,7 @@ import com.venuex.backend.entities.Event;
 import com.venuex.backend.service.EventService;
 
 @RestController
-//@RequestMapping("/api")
-@RequestMapping("/temp")
+@RequestMapping("/api")
 public class EventController {
     private final EventService eventService;
 
