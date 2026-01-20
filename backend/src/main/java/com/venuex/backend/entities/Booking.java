@@ -114,4 +114,15 @@ public class Booking {
     public void setBookedAt(LocalDateTime bookedAt) {
         this.bookedAt = bookedAt;
     }
+
+    // Ticket methods
+    public void addTicket(Ticket ticket) {
+        tickets.add(ticket);
+        ticket.setBooking(this);
+    }
+
+    public void removeTicket(Ticket ticket) {
+        tickets.remove(ticket);
+        ticket.setBooking(null);
+    }
 }

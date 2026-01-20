@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.venuex.backend.entities.Booking;
 import com.venuex.backend.entities.Booking.BookingStatus;
+import com.venuex.backend.entities.Event;
+import com.venuex.backend.entities.User;
 import com.venuex.backend.repository.BookingRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,14 +31,21 @@ class BookingServiceTest {
     private Booking booking;
 
     @BeforeEach
-    void setUp() {
-        booking = new Booking();
-        booking.setId(1);
-        booking.setUserId(10);
-        booking.setEventId(20);
-        booking.setStatus(BookingStatus.BOOKED);
-        booking.setBookedAt(LocalDateTime.now());
-    }
+void setUp() {
+    User user = new User();
+    user.setId(10);
+
+    Event event = new Event();
+    event.setId(20);
+
+    booking = new Booking();
+    booking.setId(1);
+    booking.setUser(user);
+    booking.setEvent(event);
+    booking.setStatus(Booking.BookingStatus.BOOKED);
+    booking.setBookedAt(LocalDateTime.now());
+}
+
 
     // Create booking tests
     @Test
