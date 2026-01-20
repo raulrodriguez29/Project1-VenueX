@@ -19,7 +19,9 @@ public class JwtFilter implements Filter{
         "/api/venues",
         "/api/venues/",
         "/api/events",
-        "/api/events/");
+        "/api/events/",
+        "/api/requests",
+        "/api/requests/");
 
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
