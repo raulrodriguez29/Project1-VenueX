@@ -1,4 +1,64 @@
 package com.venuex.backend.auth;
 
+import com.venuex.backend.controller.request.LoginRequest;
+import com.venuex.backend.controller.request.RegisterRequest;
+import com.venuex.backend.entities.Role;
+import com.venuex.backend.entities.User;
+import com.venuex.backend.repository.UserRepository;
+import com.venuex.backend.security.JwtUtil;
+import com.venuex.backend.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+@Service
 public class AuthService {
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil,
+                       PasswordEncoder passwordEncoder, UserService userService) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
+    }
+
+    public AuthResponse register(RegisterRequest registerRequest) {
+        // Create the user using your existing userService logic
+        User newUser = userService.registerNewUser(registerRequest);
+
+        // Generate the token
+        String token = jwtUtil.generateToken(newUser.getEmail(), "USER");
+
+        // Return the full response
+        return new AuthResponse(token, "USER", newUser.getEmail());
+    }
+
+    public AuthResponse authenticate(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        String primaryRole = getHighestRole(user);
+        String token = jwtUtil.generateToken(user.getEmail(), primaryRole);
+
+        return new AuthResponse(token, primaryRole, user.getEmail());
+    }
+
+    private String getHighestRole(User user) {
+        List<String> priority = Arrays.asList("GUEST", "USER", "HOST", "ADMIN", "SUPER_USER");
+        return user.getRoles().stream()
+                .map(Role::getType)
+                .max(Comparator.comparingInt(priority::indexOf))
+                .orElse("USER");
+    }
 }
