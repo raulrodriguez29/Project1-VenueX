@@ -6,12 +6,12 @@ import java.time.LocalDateTime;
 public class BookingDTO {
 
     private Integer id;
-    private Long userId;
-    private Long eventId;
+    private Integer userId;
+    private Integer eventId;
     private String status;
     private LocalDateTime bookedAt;
     private BigDecimal totalAmount;
 
-    // getters & setters
+    // Add getters & setters
 }
 

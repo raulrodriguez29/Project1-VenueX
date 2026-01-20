@@ -1,4 +1,12 @@
 package com.venuex.backend.repository;
 
-public class BookingRepository {
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.venuex.backend.entities.Booking;
+
+public interface BookingRepository extends JpaRepository<Booking, Integer> {
+
+    List<Booking> findByUserId(Integer userId);
 }
+
+
