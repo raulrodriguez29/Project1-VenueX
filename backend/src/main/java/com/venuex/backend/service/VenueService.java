@@ -10,6 +10,7 @@ import com.venuex.backend.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 @Service
 public class VenueService {
     private final VenueRepository venueRepository;
@@ -32,9 +33,12 @@ public class VenueService {
 
     //create, update, delete only by ADMINS
     public Venue createVenue(Venue venue) {
-        if (venueRepository.existsByName(venue.getName())) {
+        if (venueRepository.existsByName(venue.getName().toLowerCase())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
         }
+        if (venue.getName() != null) venue.setName(venue.getName().toLowerCase());
+        if (venue.getLocation() != null) venue.setLocation(venue.getLocation().toLowerCase());
+        if (venue.getDescription() != null) venue.setDescription(venue.getDescription().toLowerCase());
         return venueRepository.save(venue);
     }
 
@@ -42,14 +46,21 @@ public class VenueService {
         Venue existingVenue = venueRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
 
-        if (!existingVenue.getName().equals(updatedVenue.getName())
-                && venueRepository.existsByName(updatedVenue.getName())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
-        }
+        if (updatedVenue.getName() != null) {
+            String newName = updatedVenue.getName().toLowerCase();
 
-        existingVenue.setName(updatedVenue.getName());
-        existingVenue.setLocation(updatedVenue.getLocation());
-        existingVenue.setDescription(updatedVenue.getDescription());
+            if (!existingVenue.getName().equals(newName) && venueRepository.existsByName(newName)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
+            }
+            existingVenue.setName(newName);
+        }
+        
+        if (updatedVenue.getLocation() != null) {
+            existingVenue.setLocation(updatedVenue.getLocation().toLowerCase());
+        }
+        if (updatedVenue.getDescription() != null) {
+            existingVenue.setDescription(updatedVenue.getDescription().toLowerCase());
+        }
 
         return venueRepository.save(existingVenue);
     }
@@ -77,31 +88,23 @@ public class VenueService {
         return seatSectionRepository.saveAll(sections);
     }
 
-    public List<SeatSection> updateSeatSections(Integer venueId, List<SeatSection> sections) {
-        venueRepository.findById(venueId)
+    public List<SeatSection> updateSeatSections(Integer venueId, Map<String, Integer> capacities) {
+         venueRepository.findById(venueId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
-        
-        List<SeatSection> existingSections =
-        seatSectionRepository.findByVenueId(venueId);
 
-        if (existingSections.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat sections not found for venue");
+        List<SeatSection> sections = seatSectionRepository.findByVenueId(venueId);
+        if (sections.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No seat sections found for venue");
         }
-
-        for (SeatSection incoming : sections) {
-            for (SeatSection existing : existingSections) {
-                if (existing.getType().equals(incoming.getType())) {
-                    existing.setCapacity(incoming.getCapacity());
+        for (SeatSection section : sections) {
+            Integer newCapacity = capacities.get(section.getType());
+            if (newCapacity != null) {
+                if (newCapacity <= 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Capacity must be greater than 0");
                 }
+                section.setCapacity(newCapacity);
             }
         }
-        return seatSectionRepository.saveAll(existingSections);
-    }
-
-    public void deleteSeatSections(Integer seatSectionId) {
-        SeatSection existing = seatSectionRepository.findById(seatSectionId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat section not found"));
-    
-        seatSectionRepository.delete(existing);
+        return seatSectionRepository.saveAll(sections);
     }
 }

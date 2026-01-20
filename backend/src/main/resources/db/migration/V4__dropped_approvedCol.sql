@@ -1,0 +1,8 @@
+ALTER TABLE events
+DROP CONSTRAINT IF EXISTS events_approved_by_fkey;
+
+ALTER TABLE events
+DROP COLUMN approved_by;
+
+ALTER TABLE events
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'OPEN';

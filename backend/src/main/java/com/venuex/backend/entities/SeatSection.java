@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "seat_sections")
 public class SeatSection {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -21,7 +22,8 @@ public class SeatSection {
 
     public SeatSection() {}
 
-    public SeatSection(String type, Integer capacity, Venue venue) {
+    public SeatSection(Integer id, String type, Integer capacity, Venue venue) {
+        this.id = id;
         this.type = type;
         this.capacity = capacity;
         this.venue = venue;
@@ -42,6 +44,10 @@ public class SeatSection {
 
     public Venue getVenue() {
         return this.venue;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setType(String type) {
