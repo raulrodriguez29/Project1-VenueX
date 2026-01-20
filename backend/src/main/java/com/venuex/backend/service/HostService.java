@@ -13,8 +13,6 @@ import com.venuex.backend.entities.HostRequest;
 import com.venuex.backend.entities.User;
 import com.venuex.backend.repository.HostRequestRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class HostService {
 
