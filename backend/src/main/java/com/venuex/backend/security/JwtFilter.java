@@ -30,7 +30,7 @@ public class JwtFilter implements Filter{
 
         // Whitelist
         if (whiteList.contains(path)) {
-        chain.doFilter(request, response);
+            chain.doFilter(request, response);
             return;
         }
 
@@ -73,13 +73,12 @@ public class JwtFilter implements Filter{
                 httpRequest.setAttribute("userEmail", email);
                 httpRequest.setAttribute("userRole", role);
                 chain.doFilter(request, response);
-                return; // Stop here so we don't hit the 401 at the bottom
             } else {
                 // Token was present but failed validation (expired/tampered)
                 httpResponse.setStatus(401);
                 httpResponse.getWriter().write("Unauthorized: Invalid or expired token");
-                return;
             }
+            return; // Stop here so we don't hit the 401 at the bottom
         }
 
         //If we reach this point, it means no "Bearer" header was present at all

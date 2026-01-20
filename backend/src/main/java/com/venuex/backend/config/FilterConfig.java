@@ -13,7 +13,7 @@ public class FilterConfig {
     public FilterRegistrationBean<JwtFilter> registerJwtFilter(JwtFilter filter) {
         FilterRegistrationBean<JwtFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(filter);
-        bean.addUrlPatterns("/api/*"); // This makes the filter run on your API
+        bean.addUrlPatterns("/api/*"); // This makes the filter run on our API
         return bean;
     }
 

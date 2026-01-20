@@ -6,6 +6,14 @@ public class LoginRequest {
     private String email;
     private String password;
 
+    public LoginRequest(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    public LoginRequest() {
+    }
+
     @Override
     public String toString() {
         return "LoginRequest{" +
@@ -43,11 +51,5 @@ public class LoginRequest {
         this.password = password;
     }
 
-    public LoginRequest(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
 
-    public LoginRequest() {
-    }
 }

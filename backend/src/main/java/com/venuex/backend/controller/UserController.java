@@ -2,57 +2,117 @@ package com.venuex.backend.controller;
 
 import java.util.List;
 
+import com.venuex.backend.controller.request.PasswordChangeRequest;
+import com.venuex.backend.DTO.UserResponseDTO;
+import com.venuex.backend.DTO.UserUpdateRequestDTO;
+import com.venuex.backend.auth.AuthResponse;
+import com.venuex.backend.entities.Role;
+import com.venuex.backend.security.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.venuex.backend.entities.User;
 import com.venuex.backend.service.UserService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
-    // CREATE
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User User) {
-        return ResponseEntity.ok(userService.createUser(User));
-    }
+    // GET ALL USERS
+    @GetMapping("/admin/user")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 
-    // READ ALL
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        // Get the list from the service
+        List<UserResponseDTO> users = userService.getAllUsers();
+
+        return ResponseEntity.ok(users);
     }
 
     // READ ONE
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable Integer id, HttpServletRequest request) {
+        // Extract credentials from request attributes
+        String requesterEmail = (String) request.getAttribute("userEmail");
+        String requesterRole = (String) request.getAttribute("userRole");
+
+        // Pass these to the service so it can decide if the user is allowed to see this
+        UserResponseDTO user = userService.getUserById(id, requesterEmail, requesterRole);
+
+        return ResponseEntity.ok(user);
+    }
+
+    //SEARCH BY EMAIL, FIRST, OR LAST NAME
+    @GetMapping("/admin/user/search")
+    public ResponseEntity<List<UserResponseDTO>> searchUsers(@RequestParam String query) {
+
+        // Call service with the search term
+        List<UserResponseDTO> results = userService.searchUsers(query);
+
+        return ResponseEntity.ok(results);
     }
 
     // UPDATE
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User User) {
-        return ResponseEntity.ok(userService.updateUser(id, User));
+    @PutMapping("/user/{id}")
+    public ResponseEntity<AuthResponse> updateProfile(
+            @PathVariable Integer id,
+            @RequestBody UserUpdateRequestDTO dto,
+            HttpServletRequest request) {
+
+        // Get the identity of the person making the request
+        String requesterEmail = (String) request.getAttribute("userEmail");
+        String requesterRole = (String) request.getAttribute("userRole");
+
+        // Call the service to update the database
+        User updatedUser = userService.updateUser(id, dto, requesterEmail, requesterRole);
+
+        // Since the email might have changed, we MUST generate a new token
+        String primaryRole = updatedUser.getRoles().stream()
+                .map(Role::getType)
+                .findFirst()
+                .orElse("USER");
+
+        String newToken = jwtUtil.generateToken(updatedUser.getEmail(), primaryRole);
+
+        // Return the new token so the frontend can stay logged in
+        return ResponseEntity.ok(new AuthResponse(newToken, primaryRole, updatedUser.getEmail()));
+    }
+
+    // UPDATE PASSWORD
+    @PutMapping("/user/{id}/password")
+    public ResponseEntity<String> updatePassword(
+            @PathVariable Integer id,
+            @RequestBody PasswordChangeRequest request,
+            HttpServletRequest httpRequest) {
+
+        // Get the email of the person currently logged in from the JWT filter
+        String requesterEmail = (String) httpRequest.getAttribute("userEmail");
+
+        // Pass everything to the service
+        userService.changePassword(id, request, requesterEmail);
+
+        return ResponseEntity.ok("Password updated successfully");
     }
 
     // DELETE
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id, HttpServletRequest request) {
+        // Identify who is making the request
+        String requesterEmail = (String) request.getAttribute("userEmail");
+        String requesterRole = (String) request.getAttribute("userRole");
+
+        // Execute the deletion logic
+        userService.deleteUser(id, requesterEmail, requesterRole);
+
+        // Return 204 No Content (standard for successful deletes)
         return ResponseEntity.noContent().build();
     }
 }

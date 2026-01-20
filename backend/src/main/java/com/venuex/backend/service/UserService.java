@@ -1,7 +1,12 @@
 package com.venuex.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.venuex.backend.controller.request.PasswordChangeRequest;
+import com.venuex.backend.DTO.UserResponseDTO;
+import com.venuex.backend.DTO.UserUpdateRequestDTO;
+import com.venuex.backend.controller.request.RegisterRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +29,23 @@ public class UserService {
     }
 
     // CREATE
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
+    public User registerNewUser(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhone(request.getPhone());
 
+        // Secure the password from the DTO
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+
+        // Assign default role
         Role userRole = roleRepository.findByRoleName("USER")
-            .orElseThrow(() -> new RuntimeException("USER role not found"));
+                .orElseThrow(() -> new RuntimeException("Default USER role not found"));
 
         user.getRoles().add(userRole);
 
@@ -40,39 +53,136 @@ public class UserService {
     }
 
     // READ (by id)
-    public User getUserById(Integer id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponseDTO getUserById(Integer id, String requesterEmail, String requesterRole) {
+        // Find the user or throw 404
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        // Logic Check: (Self) OR (Admin/SuperUser)
+        boolean isSelf = user.getEmail().equals(requesterEmail);
+        boolean isAdmin = "ADMIN".equals(requesterRole) || "SUPER_USER".equals(requesterRole);
+
+        if (!isSelf && !isAdmin) {
+            throw new RuntimeException("Access Denied: You cannot view other users' profiles.");
+        }
+
+        // Return the clean DTO
+        return new UserResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone()
+        );
     }
 
     // READ (all)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> new UserResponseDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getPhone()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // SEARCH
+    public List<UserResponseDTO> searchUsers(String query) {
+        // We search across email, first name, and last name
+        return userRepository.findByEmailContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query, query)
+                .stream()
+                .map(user -> new UserResponseDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getPhone()
+                ))
+                .collect(Collectors.toList());
     }
 
     // UPDATE
-    public User updateUser(Integer id, User updatedUser) {
-        User existing = getUserById(id);
+    public User updateUser(Integer id, UserUpdateRequestDTO request, String requesterEmail, String requesterRole) {
+        // Fetch existing user
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        existing.setFirstName(updatedUser.getFirstName());
-        existing.setLastName(updatedUser.getLastName());
-        existing.setPhone(updatedUser.getPhone());
+        // Security Check: Is this the owner OR an admin?
+        boolean isOwner = existing.getEmail().equals(requesterEmail);
+        boolean isAdmin = "ADMIN".equals(requesterRole) || "SUPER_USER".equals(requesterRole);
 
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("Access Denied: You cannot update this profile.");
+        }
+
+        // Partial Update & Uniqueness Guard: Only validate/update if an email is provided (null check) AND it differs from the current one.
+        // This prevents NullPointerExceptions and avoids users being blocked by their own existing email.
+        if (request.getEmail() != null && !existing.getEmail().equalsIgnoreCase(request.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("The email " + request.getEmail() + " is already in use.");
+            }
+            existing.setEmail(request.getEmail());
+        }
+
+        // Attribute Guards: Only overwrite fields if the request provides a non-null value.
+        // This allows for "Patch" style updates where unchanged data is preserved.
+        if (request.getFirstName() != null) {
+            existing.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            existing.setLastName(request.getLastName());
+        }
+        if (request.getPhone() != null) {
+            existing.setPhone(request.getPhone());
+        }
+
+        // Save and return (ID remains the same)
         return userRepository.save(existing);
     }
 
     // UPDATE PASSWORD
-    public void updatePassword(Integer id, String newPassword) {
-        User User = getUserById(id);
-        User.setPasswordHash(passwordEncoder.encode(newPassword));
-        userRepository.save(User);
+    public void changePassword(Integer id, PasswordChangeRequest request, String requesterEmail) {
+        // Fetch user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Security: Ensure the requester is the owner of this specific ID
+        if (!user.getEmail().equals(requesterEmail)) {
+            throw new RuntimeException("Access Denied: You can only change your own password.");
+        }
+
+        // Verify the old password matches the hash in the DB
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("The current password you entered is incorrect.");
+        }
+
+        // Encode the new password and save
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     // DELETE
-    public void deleteUser(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+    public void deleteUser(Integer id, String requesterEmail, String requesterRole) {
+        // Find the user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Security Check: Is it the owner or an admin?
+        boolean isOwner = user.getEmail().equals(requesterEmail);
+        boolean isAdmin = "ADMIN".equals(requesterRole) || "SUPER_USER".equals(requesterRole);
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("Access Denied: You do not have permission to delete this account.");
         }
-        userRepository.deleteById(id);
+
+        // Optional: Clean up roles or relationships if not handled by CascadeType.REMOVE
+        user.getRoles().clear();
+
+        // Delete from the database
+        userRepository.delete(user);
     }
 }
