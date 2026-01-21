@@ -10,5 +10,13 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
 
     List<Notification> findByUserId(Integer userId);
 
+    List<Notification> findByType(String type);
+
+    List<Notification> findByUserIdAndType(Integer userId, String type);
+
+    boolean existsByUserId(Integer userId);
+
+    Integer countByUserId(Integer userId);
+
 
 }

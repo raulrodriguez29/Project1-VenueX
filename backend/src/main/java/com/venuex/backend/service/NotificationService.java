@@ -1,38 +1,60 @@
 package com.venuex.backend.service;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.venuex.backend.DTO.NotificationDTO;
 import com.venuex.backend.entities.Notification;
 import com.venuex.backend.repository.NotificationRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class NotificationService {
-    private final NotificationRepository repository;
+    private final NotificationRepository notificationRepository;
 
-    public NotificationService(NotificationRepository repository) {
-        this.repository = repository;
+    @Autowired
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
+
+    public NotificationDTO mapToDTO(Notification notification) {
+        NotificationDTO notificationDTO = new NotificationDTO();
+        notificationDTO.setId(notification.getId());
+        notificationDTO.setUserId(notification.getUser().getId());
+        notificationDTO.setType(notification.getType());
+        notificationDTO.setMessage(notification.getMessage());
+        notificationDTO.setSentAt(notification.getSentAt());
+        
+        return notificationDTO;
+    }
+
+    public Notification getNotificationById(Integer id) {
+        return notificationRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
+    }
+
+    public List<Notification> getNotificationByUserId(Integer userId) {
+        return notificationRepository.findByUserId(userId);
     }
 
     public List<Notification> getAllNotifications() {
-        return repository.findAll();
+        return notificationRepository.findAll();
     }
 
-    public List<Notification> getNotificationsByUserId(Integer userId) {
-        return repository.findByUserId(userId);
-    }
-
-    public Optional<Notification> getNotificationById(Integer id) {
-        return repository.findById(id);
-    }
-
-    public Notification saveNotification(Notification notification) {
-        return repository.save(notification);
+    public Notification createNotification(Notification notification) {
+        if (notificationRepository.existsById(notification.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Notification already exists");
+        }
+        return notificationRepository.save(notification);
     }
 
     public void deleteNotification(Integer id) {
-        repository.deleteById(id);
+        Notification existingNotification = notificationRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
+        notificationRepository.delete(existingNotification);
     }
+
 }

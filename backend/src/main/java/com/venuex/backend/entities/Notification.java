@@ -1,10 +1,15 @@
 package com.venuex.backend.entities;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,9 +20,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    //add @ManytoOne
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional=false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, length = 50)
     private String type;
@@ -25,19 +30,20 @@ public class Notification {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    //@Column(name = "sent_at", columnDefinition = "TIMESTAMP")
-    //private LocalDateTime sentAt = LocalDateTime.now();
+    @Column(name = "sent_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime sentAt = LocalDateTime.now();
 
     // Constructors
     public Notification() {
 
     }
 
-    public Notification(Integer userId, String type, String message) {
-        this.userId = userId;
+    public Notification(Integer id, User user, String type, String message) {
+        this.id = id;
+        this.user = user;
         this.type = type;
         this.message = message;
-        //this.sentAt = LocalDateTime.now();
+        this.sentAt = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -47,12 +53,12 @@ public class Notification {
     public void setId(Integer id) {
         this.id = id; }
 
-    public Integer getUserId() {
-        return userId; 
+    public User getUser() {
+        return user; 
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId; 
+    public void setUser(User user) {
+        this.user = user; 
     }
 
     public String getType() {
@@ -70,12 +76,12 @@ public class Notification {
         this.message = message;
     }
 
-    //public LocalDateTime getSentAt() {
-        //return sentAt; 
-    //}
+    public LocalDateTime getSentAt() {
+        return sentAt; 
+    }
 
-    //public void setSentAt(LocalDateTime sentAt) {
-        //this.sentAt = sentAt; 
-    //}
+    public void setSentAt(LocalDateTime sentAt) {
+        this.sentAt = sentAt; 
+    }
     
 }
