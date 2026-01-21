@@ -2,8 +2,12 @@ package com.venuex.backend.auth;
 
 import com.venuex.backend.controller.request.LoginRequest;
 import com.venuex.backend.controller.request.RegisterRequest;
+import com.venuex.backend.entities.User;
+import com.venuex.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -12,6 +16,7 @@ public class AuthController {
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
+
         this.authService = authService;
     }
 
@@ -28,4 +33,5 @@ public class AuthController {
         AuthResponse response = authService.authenticate(request);
         return ResponseEntity.ok(response);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.venuex.backend.entities; 
 
-import java.util.HashSet; 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set; 
 import jakarta.persistence.*;
 
@@ -24,6 +25,7 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "phone")
     private String phone;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -99,5 +101,6 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
 }
 

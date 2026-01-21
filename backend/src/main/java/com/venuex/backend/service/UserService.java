@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.venuex.backend.controller.request.PasswordChangeRequest;
 import com.venuex.backend.DTO.UserResponseDTO;
-import com.venuex.backend.DTO.UserUpdateRequestDTO;
+import com.venuex.backend.controller.request.UserUpdateRequest;
 import com.venuex.backend.controller.request.RegisterRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -106,7 +106,7 @@ public class UserService {
     }
 
     // UPDATE
-    public User updateUser(Integer id, UserUpdateRequestDTO request, String requesterEmail, String requesterRole) {
+    public User updateUser(Integer id, UserUpdateRequest request, String requesterEmail, String requesterRole) {
         // Fetch existing user
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -185,4 +185,5 @@ public class UserService {
         // Delete from the database
         userRepository.delete(user);
     }
+
 }
