@@ -97,4 +97,10 @@ public class TicketService implements TicketServiceInterface {
             throw new IllegalArgumentException("Invalid ID");
         }
     }
+
+    @Override
+    public Ticket addTicketToBooking(Integer bookingId, List<EventSeatSection> seatSections) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addTicketToBooking'");
+    }
 }

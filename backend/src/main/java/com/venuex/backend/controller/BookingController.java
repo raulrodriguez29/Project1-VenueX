@@ -69,7 +69,7 @@ public class BookingController {
     // TicketController
     @PostMapping("/{bookingId}/tickets")
     public Integer postTicket(@PathVariable Integer bookId, @RequestBody List<TicketDTO> purchases) {
-        ticketService.addTicketToBooking(bookId, purchases);
+        //ticketService.addTicketToBooking(bookId, purchases);
         return bookId;
     }
     
