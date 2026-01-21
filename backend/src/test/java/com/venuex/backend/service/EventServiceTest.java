@@ -34,8 +34,6 @@ import com.venuex.backend.repository.SeatSectionRepository;
 import com.venuex.backend.repository.UserRepository;
 import com.venuex.backend.repository.VenueRepository;
 
-import io.jsonwebtoken.lang.Arrays;
-
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
 
