@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.venuex.backend.controller.request.PasswordChangeRequest;
 import com.venuex.backend.DTO.UserResponseDTO;
-import com.venuex.backend.DTO.UserUpdateRequestDTO;
+import com.venuex.backend.controller.request.UserUpdateRequest;
 import com.venuex.backend.auth.AuthResponse;
 import com.venuex.backend.entities.Role;
 import com.venuex.backend.security.JwtUtil;
@@ -64,7 +64,7 @@ public class UserController {
     @PutMapping("/user/{id}")
     public ResponseEntity<AuthResponse> updateProfile(
             @PathVariable Integer id,
-            @RequestBody UserUpdateRequestDTO dto,
+            @RequestBody UserUpdateRequest dto,
             HttpServletRequest request) {
 
         // Get the identity of the person making the request

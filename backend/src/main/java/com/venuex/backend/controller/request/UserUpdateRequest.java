@@ -1,6 +1,6 @@
-package com.venuex.backend.DTO;
+package com.venuex.backend.controller.request;
 
-public class UserUpdateRequestDTO {
+public class UserUpdateRequest {
 
     private String firstName;
     private String lastName;

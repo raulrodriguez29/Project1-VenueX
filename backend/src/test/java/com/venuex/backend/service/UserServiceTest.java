@@ -1,7 +1,7 @@
 package com.venuex.backend.service;
 
 import com.venuex.backend.DTO.UserResponseDTO;
-import com.venuex.backend.DTO.UserUpdateRequestDTO;
+import com.venuex.backend.controller.request.UserUpdateRequest;
 import com.venuex.backend.entities.User;
 import com.venuex.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +71,7 @@ public class UserServiceTest {
     @DisplayName("3. Update Profile: Owner successfully updates details")
     void updateUser_AsOwner_Success() {
         // Arrange
-        UserUpdateRequestDTO dto = new UserUpdateRequestDTO();
+        UserUpdateRequest dto = new UserUpdateRequest();
         dto.setEmail("new@test.com");
         dto.setFirstName("Jane");
 
@@ -118,7 +118,7 @@ public class UserServiceTest {
     @DisplayName("6. Update Profile: Throws error if new email is already taken")
     void updateUser_EmailTaken_ThrowsException() {
         // Arrange
-        UserUpdateRequestDTO dto = new UserUpdateRequestDTO();
+        UserUpdateRequest dto = new UserUpdateRequest();
         dto.setEmail("taken@test.com");
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
         when(userRepository.existsByEmail("taken@test.com")).thenReturn(true);
@@ -147,7 +147,7 @@ public class UserServiceTest {
     @DisplayName("8. Update Profile: Partial update ignores null fields (Null Safety)")
     void updateUser_PartialUpdate_IgnoresNulls() {
         // Arrange
-        UserUpdateRequestDTO dto = new UserUpdateRequestDTO();
+        UserUpdateRequest dto = new UserUpdateRequest();
         dto.setFirstName("NewName"); // Note: lastName/email are null in DTO
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
