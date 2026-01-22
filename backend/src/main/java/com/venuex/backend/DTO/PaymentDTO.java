@@ -23,8 +23,8 @@ public class PaymentDTO {
     public BigDecimal getAmount() { return amount; }
     public String getStatus() { return status; }
 
-    public void setPaymentId() { this.paymentId = paymentId; }
-    public void setBookingId() { this.bookingId = bookingId; }
-    public void setAmount() { this.amount = amount; }
-    public void setStatus() { this.status = status; }
+    public void setPaymentId(Integer paymentId) { this.paymentId = paymentId; }
+    public void setBookingId(Integer bookingId) { this.bookingId = bookingId; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public void setStatus(String status) { this.status = status; }
 }

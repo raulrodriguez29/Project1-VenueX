@@ -10,6 +10,8 @@ import com.venuex.backend.DTO.EventSeatSectionDTO;
 import com.venuex.backend.entities.Event;
 import com.venuex.backend.service.EventService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api")
 public class EventController {
@@ -39,16 +41,21 @@ public class EventController {
 
     @PutMapping("/host/events/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventDTO updateEvent (@PathVariable Integer id, @RequestBody Event event) {
-        return eventService.updateEvent(id, event);
+    public EventDTO updateEvent (@PathVariable Integer id, @RequestBody Event event,HttpServletRequest request) {
+        String hostEmail = (String) request.getAttribute("userEmail");
+        String role = (String) request.getAttribute("userRole");
+        return eventService.updateEvent(id, event, hostEmail, role);
     }
 
     @DeleteMapping("/host/events/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable Integer id) {
-        eventService.deleteEvent(id);
+    public void deleteEvent(@PathVariable Integer id, HttpServletRequest request) {
+        String hostEmail = (String) request.getAttribute("userEmail");
+        String role = (String) request.getAttribute("userRole");
+        eventService.deleteEvent(id, hostEmail, role);
     }
 
+    //Event Seat Section stuff 
     @GetMapping("/events/{id}/event-seat-section")
     public List<EventSeatSectionDTO> getEventSeatById (@PathVariable Integer id) {
         return eventService.getEventSeatById(id);
@@ -62,7 +69,12 @@ public class EventController {
 
     @PutMapping("/host/events/{id}/event-seat-section")
     @ResponseStatus(HttpStatus.OK)
-    public List<EventSeatSectionDTO> updateEventSeatSectionPrices (@PathVariable Integer id, @RequestBody List<EventSeatSectionDTO> eventSeatSections) {
-        return eventService.updateEventSeatSectionPrices(id, eventSeatSections);
+    public List<EventSeatSectionDTO> updateEventSeatSectionPrices (
+        @PathVariable Integer id, 
+        @RequestBody List<EventSeatSectionDTO> eventSeatSections,
+        HttpServletRequest request) {
+            String hostEmail = (String) request.getAttribute("userEmail");
+            String role = (String) request.getAttribute("userRole");
+        return eventService.updateEventSeatSectionPrices(id, eventSeatSections, hostEmail, role);
     }
 }

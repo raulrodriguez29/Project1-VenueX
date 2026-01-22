@@ -107,10 +107,15 @@ public class EventService {
         return convertToDTO(saved);
     }
 
-    public EventDTO updateEvent(Integer id, Event event) {
+    public EventDTO updateEvent(Integer id, Event event, String hostEmail, String role) {
         eventCleanupService.cleanupExpiredEvents();
+
         Event existingEvent = eventRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        
+        if (!existingEvent.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+        }
         //name
         if (event.getName() != null) {
             String newName = event.getName().toLowerCase();
@@ -144,10 +149,14 @@ public class EventService {
         return convertToDTO(updatedEvent);
     }
 
-    public void deleteEvent(Integer id) {
+    public void deleteEvent(Integer id, String hostEmail, String role) {
         eventCleanupService.cleanupExpiredEvents();
         Event existingEvent = eventRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+    
+        if (!existingEvent.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+        }
         eventRepository.delete(existingEvent);
     }
 
@@ -161,13 +170,15 @@ public class EventService {
         return sections.stream()
             .map(section -> new EventSeatSectionDTO(
                 section.getSeatSection().getType(),
-                section.getPrice()))
+                section.getPrice(),
+                section.getRemainingCapacity()))
             .collect(Collectors.toList());
     }
 
     public void addEventSeatSectionPrices(Integer id, List<EventSeatSectionDTO> eventSeatSections) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+                
         if (event.getSeatSections() != null && !event.getSeatSections().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Event seat section already set");
         }
@@ -188,9 +199,13 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public List<EventSeatSectionDTO> updateEventSeatSectionPrices(Integer eventId, List<EventSeatSectionDTO> eventSeatSections) {
+    public List<EventSeatSectionDTO> updateEventSeatSectionPrices(Integer eventId, List<EventSeatSectionDTO> eventSeatSections, String hostEmail, String role) {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+        if (!event.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+        }
 
         if (event.getSeatSections() == null || event.getSeatSections().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No seat sections exist for this event");
@@ -212,7 +227,8 @@ public class EventService {
         return sections.stream()
             .map(section -> new EventSeatSectionDTO(
                 section.getSeatSection().getType(),
-                section.getPrice()))
+                section.getPrice(),
+                section.getRemainingCapacity()))
             .collect(Collectors.toList());
     }
 
@@ -221,6 +237,7 @@ public class EventService {
     /* Helpers */
     private EventDTO convertToDTO(Event event) {
         return new EventDTO(
+            event.getId(),
             event.getVenue().getName(),
             event.getName(),
             event.getDescription(),

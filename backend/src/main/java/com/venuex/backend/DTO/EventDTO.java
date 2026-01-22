@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class EventDTO {
 
+    private Integer id;
     private String venueName;
     private String name;
     private String description;
@@ -12,7 +13,8 @@ public class EventDTO {
 
     public EventDTO() {}
 
-    public EventDTO(String venueName, String name, String description, LocalDateTime startTime, String status) {
+    public EventDTO(Integer id,String venueName, String name, String description, LocalDateTime startTime, String status) {
+        this.id = id;
         this.venueName = venueName;
         this.name = name;
         this.description = description;
@@ -21,6 +23,14 @@ public class EventDTO {
     }
 
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    
     public String getVenueName() {
         return venueName;
     }
