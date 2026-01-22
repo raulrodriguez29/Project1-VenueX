@@ -1,12 +1,22 @@
-import { Routes, Route } from "react-router-dom";
-import Venues from "./pages/venues";
+import Navbar from "./components/Navbar";
+import Hero from "./components/HeroSection";
+import TrendingEvents from "./components/TrendingEvents";
+import OrganizerPromo from "./components/OrganizerPromo";
+import Footer from "./components/Footer";
 
-const App = () => {
+export default function App() {
   return (
-    <Routes>
-      <Route path="/venues" element={<Venues />} />
-    </Routes>
-  );
-};
+    <div className="h-full w-full overflow-auto font-body bg-black text-white">
+      <Navbar />
 
-export default App;
+      {/* navbar height offset MUST remain */}
+      <main className="pt-16">
+        <Hero />
+        <TrendingEvents/>
+        <OrganizerPromo />
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
