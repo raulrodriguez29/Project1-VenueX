@@ -114,7 +114,7 @@ export default function Footer() {
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                Festivals
+                Venues
               </a>
             </li>
             <li>
@@ -122,15 +122,7 @@ export default function Footer() {
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                Club Nights
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Near Me
+                Travel
               </a>
             </li>
           </ul>
@@ -160,22 +152,6 @@ export default function Footer() {
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                Press
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Blog
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
                 Contact
               </a>
             </li>
@@ -186,7 +162,7 @@ export default function Footer() {
       <div className="pt-8 border-t border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
-            © 2025 VenueX. All rights reserved.
+            © 2026 VenueX. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-6 text-sm">
             <a
