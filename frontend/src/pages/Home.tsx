@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar"
+import Navbar from "../components/navbar/Navbar"
 import HeroSection from "../components/HeroSection"
 import TrendingEvents from "../components/TrendingEvents"
 import OrganizerPromo from "../components/OrganizerPromo"
