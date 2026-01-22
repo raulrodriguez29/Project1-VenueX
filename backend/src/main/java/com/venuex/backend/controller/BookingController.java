@@ -5,72 +5,76 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.venuex.backend.DTO.BookingDTO;
 import com.venuex.backend.DTO.TicketDTO;
+import com.venuex.backend.DTO.TicketReturnDTO;
 import com.venuex.backend.entities.Booking;
-import com.venuex.backend.entities.EventSeatSection;
-import com.venuex.backend.entities.Ticket;
-import com.venuex.backend.service.BookingServiceInterface;
+import com.venuex.backend.entities.Payment;
+import com.venuex.backend.service.BookingService;
 import com.venuex.backend.service.TicketService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
-@RequestMapping("/api/bookings")
+@RequestMapping("/api")
 public class BookingController {
 
-    private final BookingServiceInterface bookingService;
+    private final BookingService bookingService;
     private final TicketService ticketService;
 
-    public BookingController(BookingServiceInterface bookingService, TicketService ticketService) {
+    public BookingController(BookingService bookingService, TicketService ticketService) {
         this.bookingService = bookingService;
         this.ticketService = ticketService;
     }
 
     // Create a new booking
-    @PostMapping
+    @PostMapping("/user/bookings")
     public ResponseEntity<Booking> createBooking(
-            @RequestParam Integer userId,
-            @RequestParam Integer eventId) {
-
-        Booking booking = bookingService.createBooking(userId, eventId);
+            @RequestParam Integer eventId,
+            HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        Booking booking = bookingService.createBooking(eventId,userEmail);
         return ResponseEntity.ok(booking);
     }
 
-    // Get a booking by ID
-    @GetMapping("/{bookingId}")
-    public ResponseEntity<Booking> getBookingById(
-            @PathVariable Integer bookingId) {
-
-        return ResponseEntity.ok(
-                bookingService.getBookingById(bookingId)
-        );
-    }
-
     // Get all bookings for a user
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Booking>> getBookingsByUser(
-            @PathVariable Integer userId) {
-
-        return ResponseEntity.ok(
-                bookingService.getBookingsByUser(userId)
-        );
-    }
-    
-    // Cancel a booking
-    @DeleteMapping("/{bookingId}")
-    public ResponseEntity<Void> cancelBooking(
-            @PathVariable Integer bookingId) {
-
-        bookingService.cancelBooking(bookingId);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/user/bookings")
+    public ResponseEntity<List<Booking>> getUserBookings(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        return ResponseEntity.ok(bookingService.getUserBookings(userEmail));
     }
 
     // TicketController
-    @PostMapping("/{bookingId}/tickets")
-    public Integer postTicket(@PathVariable Integer bookId, @RequestBody List<TicketDTO> purchases) {
-        //ticketService.addTicketToBooking(bookId, purchases);
-        return bookId;
+    @PostMapping("/user/bookings/{bookingId}/tickets")
+    public ResponseEntity<BookingDTO> addTicketsToBooking(
+        @PathVariable Integer bookingId,
+        @RequestBody List<TicketDTO> tickets,
+        HttpServletRequest request) {
+
+        String userEmail = (String) request.getAttribute("userEmail");
+        BookingDTO bookingDTO = ticketService.addTicketsToBooking(bookingId, tickets, userEmail);
+        return ResponseEntity.ok(bookingDTO);
     }
-    
+
+    @GetMapping("/user/bookings/{bookingId}/tickets")
+        public ResponseEntity<List<TicketReturnDTO>> getTicketsForBooking(
+            @PathVariable Integer bookingId,
+            HttpServletRequest request) {
+
+        String userEmail = (String) request.getAttribute("userEmail");
+
+        return ResponseEntity.ok(ticketService.getTicketsForBooking(bookingId, userEmail));
+    }
+
+    //Payment controller
+    @PostMapping("/user/bookings/{bookingId}/payment")
+    public ResponseEntity<Payment> mockPay(
+        @PathVariable Integer bookingId,
+        HttpServletRequest request) {
+
+        String userEmail = (String) request.getAttribute("userEmail");
+
+        return ResponseEntity.ok(ticketService.mockPay(bookingId, userEmail));
+    }
 }

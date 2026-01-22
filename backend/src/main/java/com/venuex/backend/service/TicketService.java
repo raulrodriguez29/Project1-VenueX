@@ -2,9 +2,13 @@ package com.venuex.backend.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.venuex.backend.DTO.BookingDTO;
+import com.venuex.backend.DTO.TicketDTO;
+import com.venuex.backend.DTO.TicketReturnDTO;
 import com.venuex.backend.entities.Booking;
 import com.venuex.backend.entities.EventSeatSection;
 import com.venuex.backend.entities.Payment;
@@ -15,92 +19,101 @@ import com.venuex.backend.repository.PaymentRepository;
 import com.venuex.backend.repository.TicketRepository;
 
 @Service
-public class TicketService implements TicketServiceInterface {
+public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final BookingRepository bookingRepository;
-    private final EventSeatSectionRepository seatSectionRepository;
+    private final EventSeatSectionRepository eventSeatSectionRepository;
     private final PaymentRepository paymentRepository;
 
     public TicketService(TicketRepository ticketRepository,
-                         BookingRepository bookingRepository,
-                         EventSeatSectionRepository seatSectionRepository,
-                         PaymentRepository paymentRepository) {
+                        BookingRepository bookingRepository,
+                        EventSeatSectionRepository eventSeatSectionRepository,
+                        PaymentRepository paymentRepository) {
         this.ticketRepository = ticketRepository;
         this.bookingRepository = bookingRepository;
-        this.seatSectionRepository = seatSectionRepository;
+        this.eventSeatSectionRepository = eventSeatSectionRepository;
         this.paymentRepository = paymentRepository;
     }
 
     // User actions
-    @Override
-    public List<Ticket> getTicketsForBooking(Integer bookingId) {
+    public List<TicketReturnDTO> getTicketsForBooking(Integer bookingId, String userEmail) {
         validateId(bookingId);
-        return ticketRepository.findByBookingId(bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (!booking.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Access denied");
+        }
+        return ticketRepository.findByBookingId(bookingId)
+            .stream()
+            .map(ticket -> new TicketReturnDTO(
+                    ticket.getId(),
+                    ticket.getEventSeatSection().getSeatSection().getType(),
+                    ticket.getPrice()
+            ))
+            .collect(Collectors.toList());
     }
 
-    @Override
-    public Ticket addTicketToBooking(Integer bookingId, Integer seatSectionId) {
+    public BookingDTO addTicketsToBooking(Integer bookingId, List<TicketDTO> tickets, String userEmail) {
         validateId(bookingId);
-        validateId(seatSectionId);
 
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        Payment payment = paymentRepository.findByBookingId(bookingId)
-            .orElseThrow(() -> new IllegalStateException("Payment not found"));
-
-        if (payment.getStatus() == Payment.PaymentStatus.PAID) {
-            throw new IllegalStateException("Cannot modify paid booking");
+        if (!booking.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Access denied");
         }
+        BigDecimal total = BigDecimal.ZERO;
+        for (TicketDTO req : tickets) {
+            EventSeatSection section = eventSeatSectionRepository
+                .findByEvent_IdAndSeatSection_Type(booking.getEvent().getId(),req.getSeatSectionName())
+                .orElseThrow(() -> new RuntimeException("Seat section not found"));
 
-        EventSeatSection section = seatSectionRepository.findById(seatSectionId)
-            .orElseThrow(() -> new IllegalArgumentException("Seat section not found"));
+            for (int i = 0; i < req.getQuantity(); i++) {
+                Ticket ticket = new Ticket();
+                ticket.setBooking(booking);
+                ticket.setEventSeatSection(section);
+                ticket.setPrice(section.getPrice());
 
-        Ticket ticket = new Ticket(section, section.getPrice());
-        booking.addTicket(ticket);
-
-        return ticketRepository.save(ticket);
+                booking.getTickets().add(ticket);
+                total = total.add(section.getPrice());
+            }
+        }
+        bookingRepository.save(booking);
+        return new BookingDTO(
+            booking.getId(),
+            booking.getUser().getEmail(),
+            booking.getEvent().getName(),
+            booking.getBookedAt(),
+            total);
     }
 
-    // Admin actions
-    @Override
-    public void updateTicketPrice(Integer ticketId, BigDecimal newPrice) {
-        validateId(ticketId);
+    public Payment mockPay(Integer bookingId, String userEmail) {
+        Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid price");
+        if (!booking.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Access denied");
         }
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-            .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
-
-        ticket.setPrice(newPrice); // admin override
-        ticketRepository.save(ticket);
-    }
-
-    @Override
-    public void refundTicket(Integer ticketId) {
-        validateId(ticketId);
-
-        Ticket ticket = ticketRepository.findById(ticketId)
-            .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
-
-        Booking booking = ticket.getBooking();
-        booking.removeTicket(ticket);
-
-        ticketRepository.delete(ticket);
+        // Prevent double payment
+        if (paymentRepository.findByBookingId(bookingId).isPresent()) {
+            throw new RuntimeException("Booking already paid");
+        }
+        //get total price
+        BigDecimal totalAmount = booking.getTickets().stream()
+            .map(Ticket::getPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Payment payment = new Payment(booking, booking.getUser(), totalAmount);
+        payment.setStatus(Payment.PaymentStatus.PAID);
+        booking.setStatus(Booking.BookingStatus.BOOKED);
+        return paymentRepository.save(payment);
     }
 
     private void validateId(Integer id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid ID");
         }
-    }
-
-    @Override
-    public Ticket addTicketToBooking(Integer bookingId, List<EventSeatSection> seatSections) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addTicketToBooking'");
     }
 }

@@ -24,9 +24,7 @@ public class JwtFilter implements Filter{
             "/api/auth/login",
             "/api/auth/register",
             "/api/events",
-            "/api/events/",
-            "/api/venues",
-            "/api/venues/");
+            "/api/venues");
 
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -41,7 +39,7 @@ public class JwtFilter implements Filter{
         String path = httpRequest.getRequestURI();
 
         // Whitelist
-        if (whiteList.contains(path)) {
+        if (whiteList.stream().anyMatch(path::startsWith)) {
             chain.doFilter(request, response);
             return;
         }
