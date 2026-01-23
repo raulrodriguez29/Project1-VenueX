@@ -9,7 +9,7 @@ public class TicketDTO {
         return seatSectionName;
     }
 
-    public void setEventSeatSectionId(String seatSectionName) {
+    public void setSeatSectionName(String seatSectionName) {
         this.seatSectionName = seatSectionName;
     }
 

@@ -35,8 +35,9 @@ public class EventController {
 
     @PostMapping("/host/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDTO addEvent(@RequestBody Event event) {
-        return eventService.addEvent(event);
+    public EventDTO addEvent(@RequestBody Event event, HttpServletRequest request) {
+        String hostEmail = (String) request.getAttribute("userEmail");
+        return eventService.addEvent(event, hostEmail);
     }
 
     @PutMapping("/host/events/{id}")

@@ -32,6 +32,8 @@ public class Ticket {
 
     // Getters & setters (booking setter REQUIRED)
     public Integer getId() { return id; }
+    
+    public void setId(Integer id) {this.id = id;}
 
     public Booking getBooking() { return booking; }
 

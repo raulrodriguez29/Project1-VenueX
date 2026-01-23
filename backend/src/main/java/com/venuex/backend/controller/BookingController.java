@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import com.venuex.backend.DTO.BookingDTO;
 import com.venuex.backend.DTO.TicketDTO;
 import com.venuex.backend.DTO.TicketReturnDTO;
-import com.venuex.backend.entities.Booking;
-import com.venuex.backend.entities.Payment;
 import com.venuex.backend.service.BookingService;
 import com.venuex.backend.service.TicketService;
 
@@ -30,19 +28,19 @@ public class BookingController {
 
     // Create a new booking
     @PostMapping("/user/bookings")
-    public ResponseEntity<Booking> createBooking(
+    public ResponseEntity<Integer> createBooking(
             @RequestParam Integer eventId,
             HttpServletRequest request) {
         String userEmail = (String) request.getAttribute("userEmail");
-        Booking booking = bookingService.createBooking(eventId,userEmail);
-        return ResponseEntity.ok(booking);
+        Integer bookingId = bookingService.createBooking(eventId,userEmail);
+        return ResponseEntity.ok(bookingId);
     }
 
     // Get all bookings for a user
-    @GetMapping("/user/bookings")
-    public ResponseEntity<List<Booking>> getUserBookings(HttpServletRequest request) {
+   @GetMapping("/user/bookings")
+    public ResponseEntity<List<BookingDTO>> getUserBookings(HttpServletRequest request) {
         String userEmail = (String) request.getAttribute("userEmail");
-        return ResponseEntity.ok(bookingService.getUserBookings(userEmail));
+        return ResponseEntity.ok(bookingService.getUserBooking(userEmail));
     }
 
     // TicketController
@@ -69,7 +67,7 @@ public class BookingController {
 
     //Payment controller
     @PostMapping("/user/bookings/{bookingId}/payment")
-    public ResponseEntity<Payment> mockPay(
+    public ResponseEntity<String> mockPay(
         @PathVariable Integer bookingId,
         HttpServletRequest request) {
 

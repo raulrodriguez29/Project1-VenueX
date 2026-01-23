@@ -75,15 +75,14 @@ public class EventService {
         return convertToDTO(event);
     }
 
-    public EventDTO addEvent(Event event) {
+    public EventDTO addEvent(Event event, String hostEmail) {
         eventCleanupService.cleanupExpiredEvents();
         Integer venueId = event.getVenue().getId();
         Venue venue = venueRepository.findById(venueId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
         event.setVenue(venue);
 
-        Integer userId = event.getCreatedBy().getId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByEmail(hostEmail)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         event.setCreatedBy(user);
 
@@ -185,7 +184,7 @@ public class EventService {
 
         for (EventSeatSectionDTO dto : eventSeatSections) {
 
-            SeatSection seatSection = seatSectionRepository.findByType(dto.getSeatSectionName())
+            SeatSection seatSection = seatSectionRepository.findByTypeAndVenue_Id(dto.getSeatSectionName(), event.getVenue().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat section not found"));
 
             EventSeatSection ess = new EventSeatSection();

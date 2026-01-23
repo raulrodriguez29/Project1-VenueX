@@ -36,7 +36,7 @@ import com.venuex.backend.repository.VenueRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
-/* 
+
     @Mock
     private EventRepository eventRepository;
 
@@ -51,6 +51,9 @@ public class EventServiceTest {
 
     @Mock
     private SeatSectionRepository seatSectionRepository;
+
+    @Mock
+    private EventCleanupService eventCleanupService;
 
     @InjectMocks
     private EventService eventService;
@@ -130,13 +133,14 @@ public class EventServiceTest {
         event.setStartTime(LocalDateTime.now().plusDays(2).withHour(18));
 
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("temp@gmail.com"))
+            .thenReturn(Optional.of(user));
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
         when(eventRepository.existsByName("temp event")).thenReturn(false);
         when(eventRepository.save(any(Event.class))).thenReturn(event);
         
 
-        EventDTO result = eventService.addEvent(event);
+        EventDTO result = eventService.addEvent(event, "temp@gmail.com");
 
         assertNotNull(result);
         assertEquals("temp event", result.getName());
@@ -150,7 +154,7 @@ public class EventServiceTest {
         when(venueRepository.findById(1)).thenReturn(Optional.empty());
         ResponseStatusException ex =
             assertThrows(ResponseStatusException.class, () -> {
-                eventService.addEvent(event);
+                eventService.addEvent(event, "temp@gmail.com");
             });
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
@@ -163,20 +167,20 @@ public class EventServiceTest {
         event.setStartTime(LocalDateTime.now().plusDays(2).withHour(18));
 
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("temp@gmail.com"))
+            .thenReturn(Optional.of(user));
         when(eventRepository.existsByName("temp event")).thenReturn(false);
         when(eventRepository.existsEventOnDay(anyInt(), any(), any())).thenReturn(true);
 
         ResponseStatusException ex =
             assertThrows(ResponseStatusException.class, () -> {
-                eventService.addEvent(event);
+                eventService.addEvent(event, "temp@gmail.com");
             });
 
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
         assertEquals("This venue already has a concert scheduled for that day", ex.getReason());
         verify(eventRepository, times(0)).findById(1);
         verify(venueRepository, times(1)).findById(1);
-        verify(userRepository, times(1)).findById(1);
     }
 
     @Test
@@ -196,7 +200,7 @@ public class EventServiceTest {
         when(eventRepository.save(any(Event.class))).thenReturn(event);
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
 
-        EventDTO result = eventService.updateEvent(1, update);
+        EventDTO result = eventService.updateEvent(1, update, "temp@gmail.com", "HOST");
 
         assertNotNull(result);
         assertEquals("new event name", result.getName());
@@ -208,7 +212,7 @@ public class EventServiceTest {
     void testUpdateEvent_Failure_EventNotFound() {
         when(eventRepository.findById(99)).thenReturn(Optional.empty());
         ResponseStatusException ex = assertThrows(
-            ResponseStatusException.class, () -> eventService.updateEvent(99, new Event()));
+            ResponseStatusException.class, () -> eventService.updateEvent(99, new Event(), "temp@gmail.com","HOST"));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         assertEquals("Event not found", ex.getReason());
@@ -256,7 +260,7 @@ public class EventServiceTest {
         List<EventSeatSectionDTO> dtos = List.of(dto);
 
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(seatSectionRepository.findByType("VIP"))
+        when(seatSectionRepository.findByTypeAndVenue_Id("VIP",1))
             .thenReturn(Optional.of(seatSection));
 
         eventService.addEventSeatSectionPrices(1, dtos);
@@ -296,7 +300,7 @@ public class EventServiceTest {
         dto.setPrice(BigDecimal.valueOf(15.00));
         updates.add(dto);
 
-        eventService.updateEventSeatSectionPrices(1, updates);
+        eventService.updateEventSeatSectionPrices(1, updates, "temp@gmail.com","HOST");
         assertEquals(BigDecimal.valueOf(15.00), eventSeatSection.getPrice());
         verify(eventRepository, times(1)).save(event);
     }
@@ -314,10 +318,9 @@ public class EventServiceTest {
 
       
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> eventService.updateEventSeatSectionPrices(2, updates));
+            () -> eventService.updateEventSeatSectionPrices(2, updates, "temp@gmail.com","HOST"));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Event not found"));
     }   
-        */
 }

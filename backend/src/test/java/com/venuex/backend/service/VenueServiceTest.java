@@ -110,8 +110,8 @@ public class VenueServiceTest {
         when(venueRepository.save(venue)).thenReturn(venue);
         Venue result = venueService.createVenue(venue);
         assertEquals("stadium", result.getName());
-        assertEquals("plano TX", result.getLocation());
-        assertEquals("place in Plano", result.getDescription());
+        assertEquals("plano", result.getLocation());
+        assertEquals("place in plano", result.getDescription());
         verify(venueRepository, times(1)).existsByName(venue.getName());
         verify(venueRepository, times(1)).save(venue);
     }

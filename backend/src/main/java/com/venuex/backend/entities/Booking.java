@@ -11,7 +11,6 @@ import jakarta.persistence.*;
 public class Booking {
 
     public enum BookingStatus {
-        PENDING_PAYMENT,
         BOOKED,
         CANCELED
     }

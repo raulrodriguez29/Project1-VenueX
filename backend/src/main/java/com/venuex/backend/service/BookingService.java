@@ -1,12 +1,18 @@
 package com.venuex.backend.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.venuex.backend.DTO.BookingDTO;
 import com.venuex.backend.entities.Booking;
 import com.venuex.backend.entities.Event;
+import com.venuex.backend.entities.Ticket;
 import com.venuex.backend.entities.User;
 import com.venuex.backend.repository.BookingRepository;
 import com.venuex.backend.repository.EventRepository;
@@ -28,27 +34,42 @@ public class BookingService {
         this.eventRepository = eventRepository;
     }
 
-    public Booking createBooking(Integer eventId, String userEmail) {
+    public Integer createBooking(Integer eventId, String userEmail) {
 
         User user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setEvent(event);
-        booking.setStatus(Booking.BookingStatus.PENDING_PAYMENT);
+        booking.setStatus(Booking.BookingStatus.CANCELED);
         booking.setBookedAt(LocalDateTime.now());
-
-        return bookingRepository.save(booking);
+        bookingRepository.save(booking);
+        return booking.getId();
     }
 
-    public List<Booking> getUserBookings(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<BookingDTO> getUserBooking(String userEmail) {
 
-        return bookingRepository.findByUserId(user.getId());
-    } 
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Booking> bookings = bookingRepository.findByUserId(user.getId());
+        return bookings.stream()
+            .map(booking -> {
+                BigDecimal total = booking.getTickets().stream()
+                    .map(Ticket::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                return new BookingDTO(
+                    booking.getId(),
+                    booking.getUser().getEmail(),
+                    booking.getEvent().getName(),
+                    booking.getBookedAt(),
+                    total);
+            })
+            .collect(Collectors.toList());
+    }
 }

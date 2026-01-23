@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.venuex.backend.DTO.BookingDTO;
 import com.venuex.backend.DTO.TicketDTO;
@@ -40,10 +42,10 @@ public class TicketService {
     public List<TicketReturnDTO> getTicketsForBooking(Integer bookingId, String userEmail) {
         validateId(bookingId);
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         if (!booking.getUser().getEmail().equals(userEmail)) {
-            throw new RuntimeException("Access denied");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized user");
         }
         return ticketRepository.findByBookingId(bookingId)
             .stream()
@@ -59,16 +61,16 @@ public class TicketService {
         validateId(bookingId);
 
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         if (!booking.getUser().getEmail().equals(userEmail)) {
-            throw new RuntimeException("Access denied");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized user");
         }
         BigDecimal total = BigDecimal.ZERO;
         for (TicketDTO req : tickets) {
             EventSeatSection section = eventSeatSectionRepository
                 .findByEvent_IdAndSeatSection_Type(booking.getEvent().getId(),req.getSeatSectionName())
-                .orElseThrow(() -> new RuntimeException("Seat section not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event seat section not found"));
 
             for (int i = 0; i < req.getQuantity(); i++) {
                 Ticket ticket = new Ticket();
@@ -89,17 +91,21 @@ public class TicketService {
             total);
     }
 
-    public Payment mockPay(Integer bookingId, String userEmail) {
+    public String mockPay(Integer bookingId, String userEmail) {
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         if (!booking.getUser().getEmail().equals(userEmail)) {
-            throw new RuntimeException("Access denied");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized user");
         }
 
         // Prevent double payment
         if (paymentRepository.findByBookingId(bookingId).isPresent()) {
-            throw new RuntimeException("Booking already paid");
+            throw new ResponseStatusException(HttpStatus.ALREADY_REPORTED, "Booking already paid");
+        }
+
+        if (booking.getTickets().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tickets not found");
         }
         //get total price
         BigDecimal totalAmount = booking.getTickets().stream()
@@ -108,7 +114,8 @@ public class TicketService {
         Payment payment = new Payment(booking, booking.getUser(), totalAmount);
         payment.setStatus(Payment.PaymentStatus.PAID);
         booking.setStatus(Booking.BookingStatus.BOOKED);
-        return paymentRepository.save(payment);
+        paymentRepository.save(payment);
+        return "PAID";
     }
 
     private void validateId(Integer id) {
