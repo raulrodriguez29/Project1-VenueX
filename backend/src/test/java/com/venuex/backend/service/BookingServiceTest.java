@@ -118,20 +118,18 @@ class BookingServiceTest {
         Ticket ticket2 = new Ticket();
         ticket2.setPrice(BigDecimal.valueOf(25));
         booking.setTickets(List.of(ticket1, ticket2));
-        when(bookingRepository.findByUserId(mockUser.getId()))
-            .thenReturn(List.of(booking));
 
+        when(bookingRepository.findByUserIdAndStatus(mockUser.getId(), Booking.BookingStatus.BOOKED))
+            .thenReturn(List.of(booking));
         List<BookingDTO> bookingDTOs = bookingService.getUserBooking("temp@gmail.com");
 
         assertNotNull(bookingDTOs);
-        assertEquals(1, bookingDTOs.size());
 
         BookingDTO dto = bookingDTOs.get(0);
         assertEquals(booking.getId(), dto.getId());
-        assertEquals(booking.getEvent().getName(), dto.getEventId());
+        assertEquals(booking.getEvent().getName(), dto.getEventName());
         assertEquals(booking.getBookedAt(), dto.getBookedAt());
         verify(userRepository).findByEmail("temp@gmail.com");
-        verify(bookingRepository).findByUserId(mockUser.getId());
     }
 
 

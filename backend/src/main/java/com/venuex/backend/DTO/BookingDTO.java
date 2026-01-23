@@ -22,14 +22,14 @@ public class BookingDTO {
     }
 
     public Integer getId() { return id; }
-    public String getUserId() { return userName; }
-    public String getEventId() { return eventName; }
+    public String getUserName() { return userName; }
+    public String getEventName() { return eventName; }
     public LocalDateTime getBookedAt()  {return bookedAt; }
     public BigDecimal getTotalAmount()  {return totalAmount; }
 
     public void setId(Integer id) { this.id = id; }
-    public void setUserId(String userName) { this.userName = userName; }
-    public void setEventId(String eventName) { this.eventName = eventName; }
+    public void setUserName(String userName) { this.userName = userName; }
+    public void setEventName(String eventName) { this.eventName = eventName; }
     public void setBookedAt(LocalDateTime bookedAt) { this.bookedAt = bookedAt; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 }

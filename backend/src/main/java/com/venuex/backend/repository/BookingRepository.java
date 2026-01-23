@@ -7,6 +7,7 @@ import com.venuex.backend.entities.Booking;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     List<Booking> findByUserId(Integer userId);
+    List<Booking> findByUserIdAndStatus(Integer userId, Booking.BookingStatus status);
 }
 
 

@@ -155,8 +155,8 @@ class TicketServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getId());
-        assertEquals("temp@gmail.com", result.getUserId());
-        assertEquals("Temp Event", result.getEventId());
+        assertEquals("temp@gmail.com", result.getUserName());
+        assertEquals("Temp Event", result.getEventName());
         assertEquals(BigDecimal.valueOf(100), result.getTotalAmount()); // 50 * 2
 
         assertEquals(2, booking.getTickets().size());

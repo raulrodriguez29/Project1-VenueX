@@ -56,7 +56,7 @@ public class BookingService {
         User user = userRepository.findByEmail(userEmail)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<Booking> bookings = bookingRepository.findByUserId(user.getId());
+        List<Booking> bookings = bookingRepository.findByUserIdAndStatus(user.getId(), Booking.BookingStatus.BOOKED);
         return bookings.stream()
             .map(booking -> {
                 BigDecimal total = booking.getTickets().stream()
