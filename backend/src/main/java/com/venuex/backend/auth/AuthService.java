@@ -30,14 +30,15 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest registerRequest) {
-        // Create the user using your existing userService logic
+        // Create the user using our existing userService logic
         User newUser = userService.registerNewUser(registerRequest);
 
         // Generate the token
         String token = jwtUtil.generateToken(newUser.getEmail(), "USER");
 
         // Return the full response
-        return new AuthResponse(token, "USER", newUser.getEmail());
+        return new AuthResponse(newUser.getId(), token, "USER", newUser.getEmail(),
+                newUser.getFirstName(), newUser.getLastName(), newUser.getPhone());
     }
 
     public AuthResponse authenticate(LoginRequest loginRequest) {
@@ -51,7 +52,8 @@ public class AuthService {
         String primaryRole = getHighestRole(user);
         String token = jwtUtil.generateToken(user.getEmail(), primaryRole);
 
-        return new AuthResponse(token, primaryRole, user.getEmail());
+        return new AuthResponse(user.getId(), token, primaryRole, user.getEmail(), user.getFirstName(),
+                user.getLastName(), user.getPhone());
     }
 
     private String getHighestRole(User user) {
