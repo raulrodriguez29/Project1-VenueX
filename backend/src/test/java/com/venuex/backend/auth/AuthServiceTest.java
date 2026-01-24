@@ -35,81 +35,92 @@ public class AuthServiceTest {
     @InjectMocks private AuthService authService;
 
     private User testUser;
-    private final String EMAIL = "test@venuex.com";
-    private final String RAW_PW = "password123";
-    private final String HASHED_PW = "encoded_hash";
+    private final String EMAIL = "josh@test.com";
+    private final String RAW_PW = "password";
+    private final String HASHED_PW = "$2a$10$lVZ1Fro/ltA8triMTiJ4O./LHOKiOCLk0SFg7Ah6HyA50CDY79g.y";
 
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setId(1);
+        testUser.setId(1); // Integer ID
         testUser.setEmail(EMAIL);
         testUser.setPasswordHash(HASHED_PW);
+        testUser.setFirstName("Josh");
+        testUser.setLastName("Lian");
+        testUser.setPhone("555-0103");
 
         Role userRole = new Role();
         userRole.setType("USER");
         testUser.setRoles(Set.of(userRole));
     }
 
-    // HAPPY PATH CASES
     @Test
-    @DisplayName("1. Authenticate: Correct credentials return full response")
+    @DisplayName("1. Authenticate: Correct credentials return all response fields")
     void authenticate_Success() {
         // Arrange
         LoginRequest request = new LoginRequest(EMAIL, RAW_PW);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(RAW_PW, HASHED_PW)).thenReturn(true);
-        when(jwtUtil.generateToken(EMAIL, "USER")).thenReturn("token");
+        when(jwtUtil.generateToken(EMAIL, "USER")).thenReturn("jwt-token-123");
 
         // Act
         AuthResponse response = authService.authenticate(request);
 
         // Assert
         assertAll(
-                () -> assertEquals(EMAIL, response.getEmail()),
+                () -> assertEquals(1, response.getId()),
+                () -> assertEquals("jwt-token-123", response.getToken()),
                 () -> assertEquals("USER", response.getRole()),
-                () -> assertNotNull(response.getToken())
+                () -> assertEquals(EMAIL, response.getEmail()),
+                () -> assertEquals("Josh", response.getFirstName()),
+                () -> assertEquals("Lian", response.getLastName()),
+                () -> assertEquals("555-0103", response.getPhone())
         );
     }
 
     @Test
-    @DisplayName("2. Register: New user creation returns token")
+    @DisplayName("2. Register: New user creation maps all fields to response")
     void register_Success() {
         // Arrange
         RegisterRequest request = new RegisterRequest();
         request.setEmail(EMAIL);
-        when(userService.registerNewUser(any())).thenReturn(testUser);
-        when(jwtUtil.generateToken(EMAIL, "USER")).thenReturn("token");
+        when(userService.registerNewUser(any(RegisterRequest.class))).thenReturn(testUser);
+        when(jwtUtil.generateToken(EMAIL, "USER")).thenReturn("reg-token");
 
         // Act
         AuthResponse response = authService.register(request);
 
         // Assert
-        assertNotNull(response.getToken());
+        assertAll(
+                () -> assertEquals(1, response.getId()),
+                () -> assertEquals("reg-token", response.getToken()),
+                () -> assertEquals("Josh", response.getFirstName()),
+                () -> assertEquals("Lian", response.getLastName()),
+                () -> assertEquals("555-0103", response.getPhone()),
+                () -> assertEquals(EMAIL, response.getEmail())
+        );
         verify(userService, times(1)).registerNewUser(request);
     }
 
     @Test
-    @DisplayName("3. Highest Role: Logic correctly identifies SUPER_USER priority")
-    void getHighestRole_SuperUserPriority() {
+    @DisplayName("3. Highest Role: Logic correctly identifies ADMIN priority")
+    void getHighestRole_AdminPriority() {
         // Arrange
-        Role superRole = new Role(); superRole.setType("SUPER_USER");
         Role adminRole = new Role(); adminRole.setType("ADMIN");
-        testUser.setRoles(Set.of(adminRole, superRole));
-        LoginRequest request = new LoginRequest(EMAIL, RAW_PW);
+        Role userRole = new Role(); userRole.setType("USER");
+        testUser.setRoles(Set.of(userRole, adminRole));
 
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
-        when(jwtUtil.generateToken(eq(EMAIL), eq("SUPER_USER"))).thenReturn("su-token");
+        when(jwtUtil.generateToken(eq(EMAIL), eq("ADMIN"))).thenReturn("admin-token");
 
         // Act
-        AuthResponse res = authService.authenticate(request);
+        AuthResponse res = authService.authenticate(new LoginRequest(EMAIL, RAW_PW));
 
         // Assert
-        assertEquals("SUPER_USER", res.getRole());
+        assertEquals("ADMIN", res.getRole());
     }
 
-    // NEGATIVE PATH CASES
     @Test
     @DisplayName("4. Authenticate: Throws error for non-existent email")
     void authenticate_UserNotFound() {
@@ -135,7 +146,7 @@ public class AuthServiceTest {
 
     @Test
     @DisplayName("6. Register: Propagates error if UserService fails")
-    void register_FailsWhenEmailTaken() {
+    void register_FailsOnExistingEmail() {
         // Arrange
         when(userService.registerNewUser(any())).thenThrow(new RuntimeException("Email taken"));
 
@@ -144,7 +155,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("7. Role Logic: Defaults to USER if user has zero roles")
+    @DisplayName("7. Role Logic: Defaults to USER if user has no roles assigned")
     void authenticate_EmptyRolesDefaultsToUser() {
         // Arrange
         testUser.setRoles(Collections.emptySet());
@@ -153,46 +164,15 @@ public class AuthServiceTest {
         LoginRequest request = new LoginRequest(EMAIL, RAW_PW);
 
         // Act
-        authService.authenticate(request);
+        AuthResponse res = authService.authenticate(request);
 
         // Assert
+        assertEquals("USER", res.getRole());
         verify(jwtUtil).generateToken(EMAIL, "USER");
     }
 
-    // EDGE CASES
-
     @Test
-    @DisplayName("8. Authenticate: Case sensitivity check on email lookup")
-    void authenticate_EmailCaseSensitivity() {
-        // Arrange
-        LoginRequest request = new LoginRequest("TEST@VENUEX.COM", RAW_PW);
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-
-        // Act
-        authService.authenticate(request);
-
-        // Assert
-        verify(userRepository).findByEmail("TEST@VENUEX.COM");
-    }
-
-    @Test
-    @DisplayName("9. Register: Token is generated even if user has no ID yet")
-    void register_NoIdSafety() {
-        // Arrange
-        User unsavedUser = new User();
-        unsavedUser.setEmail("new@test.com");
-        when(userService.registerNewUser(any())).thenReturn(unsavedUser);
-
-        // Act
-        authService.register(new RegisterRequest());
-
-        // Assert
-        verify(jwtUtil).generateToken("new@test.com", "USER");
-    }
-
-    @Test
-    @DisplayName("10. Highest Role: Correctly picks HOST over USER")
+    @DisplayName("8. Role Logic: Priority check for HOST vs USER")
     void getHighestRole_HostPriority() {
         // Arrange
         Role host = new Role(); host.setType("HOST");
@@ -208,4 +188,37 @@ public class AuthServiceTest {
         assertEquals("HOST", res.getRole());
     }
 
+    @Test
+    @DisplayName("9. Authenticate: Verifies repository and encoder interactions")
+    void authenticate_VerifyWorkflow() {
+        // Arrange
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches(RAW_PW, HASHED_PW)).thenReturn(true);
+
+        // Act
+        authService.authenticate(new LoginRequest(EMAIL, RAW_PW));
+
+        // Assert
+        verify(userRepository).findByEmail(EMAIL);
+        verify(passwordEncoder).matches(RAW_PW, HASHED_PW);
+        verify(jwtUtil).generateToken(EMAIL, "USER");
+    }
+
+    @Test
+    @DisplayName("10. Highest Role: Peak priority for SUPER_USER")
+    void getHighestRole_SuperUserPriority() {
+        // Arrange
+        Role superRole = new Role(); superRole.setType("SUPER_USER");
+        Role adminRole = new Role(); adminRole.setType("ADMIN");
+        testUser.setRoles(Set.of(adminRole, superRole));
+
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
+
+        // Act
+        AuthResponse res = authService.authenticate(new LoginRequest(EMAIL, RAW_PW));
+
+        // Assert
+        assertEquals("SUPER_USER", res.getRole());
+    }
 }

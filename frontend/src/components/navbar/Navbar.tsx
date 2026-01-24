@@ -1,4 +1,4 @@
-import {AuthButtons} from "./AuthButtons";
+import { UserActions } from "./UserActions";
 // import {UserActions} from "./UserActions";
 
 export default function Navbar() {
@@ -54,7 +54,7 @@ export default function Navbar() {
           </div>
         </div>
       {/* Auth Buttons */}
-      <AuthButtons/>
+      <UserActions/>
   </div>
 </nav>
   );

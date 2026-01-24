@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './axios.config';
 
 export interface AuthResponse {
     id: number,
@@ -22,7 +22,7 @@ const API_URL = 'http://localhost:8080/api/auth';
 
 export const registerUser = async (userData: RegisterData): Promise<AuthResponse> => {
     try {
-        const response = await axios.post(`${API_URL}/register`, userData);
+        const response = await api.post(`${API_URL}/register`, userData);
         
         const data = response.data;
         
@@ -53,7 +53,7 @@ export interface LoginData {
 
 export const loginUser = async (credentials: LoginData): Promise<AuthResponse> => {
     try {
-        const response = await axios.post(`${API_URL}/login`, credentials);
+        const response = await api.post(`${API_URL}/login`, credentials);
         
         const data = response.data;
         // ADD THIS LINE
@@ -83,12 +83,3 @@ export const logoutUser = () => {
     localStorage.removeItem('lastName');
     localStorage.removeItem('phone');
 };
-
-// This helper attaches the JWT to every request automatically
-axios.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
