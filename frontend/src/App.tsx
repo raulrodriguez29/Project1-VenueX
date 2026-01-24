@@ -1,12 +1,11 @@
-import { Routes, Route } from "react-router-dom";
-import Venues from "./pages/venues";
+// import Home from "./pages/Home";
+//import Page from "./pages/Page"
+import Venues from "./pages/Venues";
 
-const App = () => {
+export default function App() {
   return (
-    <Routes>
-      <Route path="/venues" element={<Venues />} />
-    </Routes>
+    <div className="h-full w-full overflow-auto font-body bg-black text-white">
+      <Venues/>
+    </div>
   );
-};
-
-export default App;
+}

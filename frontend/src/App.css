@@ -1,42 +1,196 @@
-#root {
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+} */
+
+/* =====================
+   Base / Fonts
+===================== */
+
+/* Base */
+body {
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Fonts */
+.font-display {
+  font-family: 'Bebas Neue', cursive;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.font-body {
+  font-family: 'Inter', sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 51, 102, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(255, 51, 102, 0.8); }
 }
 
+.glow-button {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Layout & Backgrounds */
+.hero-gradient {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a0a 100%);
+}
+
+.nav-bg {
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+.section-dark {
+  background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+}
+
+.section-purple {
+  background: linear-gradient(135deg, #1a0a2a 0%, #2a1a3a 50%, #1a0a2a 100%);
+}
+
+.section-gradient-dark {
+  background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+}
+
+.section-gradient-purple {
+  background: linear-gradient(135deg, #1a0a2a 0%, #2a1a3a 50%, #1a0a2a 100%);
+}
+
+.footer-bg {
+  background: #0a0a0a;
+  border-top: 1px solid #222;
+}
+
+/* Buttons & Badges */
+.btn-primary {
+  background: linear-gradient(135deg, #ff3366, #ff6699);
+}
+
+.btn-brand {
+  background: linear-gradient(135deg, #ff3366, #ff6699);
+}
+
+.btn-brand:hover {
+  transform: scale(1.05);
+}
+
+.badge-featured {
+  background: rgba(255, 51, 102, 0.2);
+  border: 1px solid rgba(255, 51, 102, 0.3);
+}
+
+.badge-brand {
+  background: rgba(255, 51, 102, 0.2);
+  border: 1px solid rgba(255, 51, 102, 0.3);
+}
+
+.badge-solid {
+  background: rgba(255, 51, 102, 0.9);
+}
+
+.price-highlight {
+  color: #ff3366;
+}
+
+/* Cards */
 .card {
-  padding: 2em;
+  background: #1a1a1a;
+  border: 1px solid #333;
 }
 
-.read-the-docs {
-  color: #888;
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* Dropdowns */
+.nav-dropdown {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.nav-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Search */
+.search-box {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.search-results {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.search-results.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+/* Decorative */
+.geometric-pattern {
+  background-image:
+    linear-gradient(30deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+    linear-gradient(150deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+    linear-gradient(30deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+    linear-gradient(150deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1));
+  background-size: 80px 140px;
+  background-position: 0 0, 0 0, 40px 70px, 40px 70px;
+}
+
+/* Utility Colors */
+.text-brand {
+  color: #ff3366;
+}
+
+.bg-dark {
+  background-color: #1a1a1a;
+}
+
+.bg-brand {
+  background: linear-gradient(135deg, #ff3366, #ff6699);
+}
+
+.bg-surface {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.bg-modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
 }
