@@ -1,6 +1,8 @@
 import {CartIcon} from "./Icons";
 import {ProfileIcon} from "./Icons";
 import {InboxIcon} from "./Icons";
+import { useAuth } from "../../auth/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 
 type UserActionsProps = {
   cartCount?: number
@@ -55,22 +57,51 @@ export const UserActions = ({
   onInboxClick,
   onProfileClick,
 }: UserActionsProps) => {
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="flex items-center gap-3">
-      {/* Cart */}
-      <ActionButton onClick={onCartClick} ariaLabel="Shopping cart">
-        <CartIcon />
-        {cartCount > 0 && <Badge count={cartCount} />}
-      </ActionButton>
+      {isLoggedIn ? (
+        <>
+          {/* Show Icons only when logged in */}
+          <ActionButton onClick={onCartClick} ariaLabel="Shopping cart">
+            <CartIcon />
+            {cartCount > 0 && <Badge count={cartCount} />}
+          </ActionButton>
 
-      {/* Inbox */}
-      <ActionButton onClick={onInboxClick} ariaLabel="Messages">
-        <InboxIcon />
-        {inboxCount > 0 && <Badge count={inboxCount} />}
-      </ActionButton>
+          <ActionButton onClick={onInboxClick} ariaLabel="Messages">
+            <InboxIcon />
+            {inboxCount > 0 && <Badge count={inboxCount} />}
+          </ActionButton>
 
-      {/* Profile */}
-      <ProfileButton onClick={onProfileClick} />
+          <ProfileButton onClick={onProfileClick} />
+          
+          <button 
+            onClick={logout}
+            className="ml-2 text-xs font-bold text-gray-400 hover:text-brand transition-colors uppercase tracking-widest"
+          >
+            Logout
+          </button>
+        </>
+      ) : (
+        /* Show Login/Signup when logged out */
+        <div className="flex items-center gap-4">
+          <Link 
+            to="/login" 
+            className="text-sm font-semibold text-gray-300 hover:text-white transition-colors"
+          >
+            Login
+          </Link>
+          <button
+            onClick={() => navigate("/register")}
+            className="px-6 py-2 rounded-full text-sm font-bold text-white transition-all hover:scale-105 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+          >
+            SIGN UP
+          </button>
+        </div>
+      )}
     </div>
   )
 }

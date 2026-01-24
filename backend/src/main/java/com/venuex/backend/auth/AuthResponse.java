@@ -2,17 +2,57 @@ package com.venuex.backend.auth;
 
 public class AuthResponse {
 
+    private Integer id;
     private String token;
     private String role;
     private String email;
+    private String firstName;
+    private String lastName;
+    private String phone;
 
-    public AuthResponse(String token, String role, String email) {
+    public AuthResponse(Integer id, String token, String role, String email, String firstName, String lastName, String phone) {
+        this.id = id;
         this.token = token;
         this.role = role;
         this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
     }
 
     public AuthResponse() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getToken() {

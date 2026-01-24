@@ -83,7 +83,8 @@ public class UserController {
         String newToken = jwtUtil.generateToken(updatedUser.getEmail(), primaryRole);
 
         // Return the new token so the frontend can stay logged in
-        return ResponseEntity.ok(new AuthResponse(newToken, primaryRole, updatedUser.getEmail()));
+        return ResponseEntity.ok(new AuthResponse(updatedUser.getId(), newToken, primaryRole, updatedUser.getEmail(),
+                updatedUser.getFirstName(), updatedUser.getLastName(), updatedUser.getPhone()));
     }
 
     // UPDATE PASSWORD
