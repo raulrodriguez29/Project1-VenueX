@@ -1,22 +1,22 @@
 package com.venuex.backend.service;
 
-import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,307 +24,162 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.venuex.backend.DTO.HostRequestDTO;
-import com.venuex.backend.entities.HostRequest;
+import com.venuex.backend.entities.HostRequest.HostRequestStatus;
+import com.venuex.backend.entities.Role;
 import com.venuex.backend.entities.User;
 import com.venuex.backend.repository.HostRequestRepository;
+import com.venuex.backend.repository.RoleRepository;
+import com.venuex.backend.repository.UserRepository;
+import com.venuex.backend.entities.HostRequest;
 
 @ExtendWith(MockitoExtension.class)
-public class HostServiceTest { //tests per method are organized alphabetically
+class HostServiceTest {
 
     @Mock
     private HostRequestRepository hostRequestRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private HostService hostService;
 
-    User user;
-    HostRequest hostRequest;
+    private User user;
+    private User admin;
+    private HostRequest hostRequest;
+    private Role hostRole;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         user = new User();
-        user.setEmail("timothy.olyphant68@gmail.com");
-        user.setPhone("(469)-123-4567");
         user.setId(1);
-        user.setFirstName("Timothy");
-        user.setLastName("Olyphant");
-        user.setPasswordHash("password");
+        user.setEmail("user@test.com");
+        user.setRoles(new HashSet<>());
+
+        admin = new User();
+        admin.setId(2);
+        admin.setEmail("admin@test.com");
+
+        hostRole = new Role();
+        hostRole.setType("HOST");
 
         hostRequest = new HostRequest();
-        hostRequest.setId(1);
+        hostRequest.setId(10);
         hostRequest.setUser(user);
-        hostRequest.setStatus("PENDING");
-        hostRequest.setRequestedAt(LocalDateTime.now().minusDays(1));
-        hostRequest.setReviewedBy(user);
-    }
-    
-    @Test
-    void approveHostRequest_Success_ReturnHostRequest() {
-        User admin = new User();
-        admin.setEmail("drew.barrymore75@gmail.com");
-        admin.setPhone("(469)-987-6543");
-        admin.setId(2);
-        admin.setFirstName("Drew");
-        admin.setLastName("Barrymore");
-        admin.setPasswordHash("password2");
-
-        when(hostRequestRepository.findById(hostRequest.getId()))
-            .thenReturn(Optional.of(hostRequest));
-
-        when(hostRequestRepository.save(any(HostRequest.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-
-        HostRequest result = hostService.approveHostRequest(hostRequest.getId(), admin);
-
-        assertEquals(user, result.getUser());
-        assertEquals("APPROVED", result.getStatus());
-        assertEquals(hostRequest.getRequestedAt(), result.getRequestedAt());
-        assertEquals(admin, result.getReviewedBy());
-
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
-        verify(hostRequestRepository, times(1)).save(hostRequest);
+        hostRequest.setStatus(HostRequestStatus.PENDING);
     }
 
     @Test
-    void approveHostRequest_Failure_NotFound() {
-        User admin = new User();
-        admin.setEmail("drew.barrymore75@gmail.com");
-        admin.setPhone("(469)-987-6543");
-        admin.setId(2);
-        admin.setFirstName("Drew");
-        admin.setLastName("Barrymore");
-        admin.setPasswordHash("password2");
-
-        when(hostRequestRepository.findById(hostRequest.getId()))
-            .thenReturn(Optional.empty());
-
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> hostService.approveHostRequest(hostRequest.getId(), admin)
-        );
-
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Host Request not found", exception.getReason());
-
-
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
-        verify(hostRequestRepository, never()).save(any());
-    }
-
-    @Test
-    void createHostRequest_Success_ReturnHostRequest() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
-            .thenReturn(false);
-        when(hostRequestRepository.save(hostRequest))
-            .thenReturn(hostRequest);
-
-        HostRequest result = hostService.createHostRequest(hostRequest);
-
-        assertNotNull(result);
-        assertSame(hostRequest, result);
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, times(1)).save(hostRequest);
-    }
-
-    @Test
-    void createHostRequest_Failure_AlreadyExists() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
-            .thenReturn(true);
-
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> hostService.createHostRequest(hostRequest)
-        );
-
-        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-        assertEquals("Host Request already exists", exception.getReason());
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, never()).save(hostRequest);
-    }
-
-    @Test
-    void deleteHostRequest_SUCCESS_ReturnVoid() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
-            .thenReturn(true);
-        doNothing().when(hostRequestRepository).deleteById(hostRequest.getId());
-
-        hostService.deleteHostRequest(hostRequest.getId());
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, times(1)).deleteById(hostRequest.getId());
-    }
-
-    @Test
-    void deleteHostRequest_FAILURE_NotFound() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
+    void createHostRequest_success() {
+        when(userRepository.findByEmail("user@test.com"))
+            .thenReturn(Optional.of(user));
+        when(hostRequestRepository.existsByUserAndStatus(user, HostRequestStatus.PENDING))
             .thenReturn(false);
 
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> hostService.deleteHostRequest(hostRequest.getId())
-        );
+        String result = hostService.createHostRequest("user@test.com", "USER");
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Host Request not found", exception.getReason());
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, never()).deleteById(any());
+        assertEquals("SUBMITTED", result);
+        verify(hostRequestRepository).save(any(HostRequest.class));
     }
 
     @Test
-    void denyHostRequest_Success_ReturnHostRequest() {
-        User admin = new User();
-        admin.setEmail("drew.barrymore75@gmail.com");
-        admin.setPhone("(469)-987-6543");
-        admin.setId(2);
-        admin.setFirstName("Drew");
-        admin.setLastName("Barrymore");
-        admin.setPasswordHash("password2");
+    void createHostRequest_notUserRole_throwsUnauthorized() {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+            () -> hostService.createHostRequest("user@test.com", "ADMIN"));
 
-        when(hostRequestRepository.findById(hostRequest.getId()))
-            .thenReturn(Optional.of(hostRequest));
-
-        when(hostRequestRepository.save(any(HostRequest.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-
-        HostRequest result = hostService.denyHostRequest(hostRequest.getId(), admin);
-
-        assertEquals(user, result.getUser());
-        assertEquals("DENIED", result.getStatus());
-        assertEquals(hostRequest.getRequestedAt(), result.getRequestedAt());
-        assertEquals(admin, result.getReviewedBy());
-
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
-        verify(hostRequestRepository, times(1)).save(hostRequest);
+        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
     }
 
     @Test
-    void denyHostRequest_Failure_NotFound() {
-        User admin = new User();
-        admin.setEmail("drew.barrymore75@gmail.com");
-        admin.setPhone("(469)-987-6543");
-        admin.setId(2);
-        admin.setFirstName("Drew");
-        admin.setLastName("Barrymore");
-        admin.setPasswordHash("password2");
+    void getAllHostRequests_success() {
+        when(hostRequestRepository.findAll())
+            .thenReturn(List.of(hostRequest));
 
-        when(hostRequestRepository.findById(hostRequest.getId()))
-            .thenReturn(Optional.empty());
-
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class,
-            () -> hostService.denyHostRequest(hostRequest.getId(), admin)
-        );
-
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Host Request not found", exception.getReason());
-
-
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
-        verify(hostRequestRepository, never()).save(any());
-    }
-
-    @Test
-    void getAllHostRequests_Success_ReturnHostRequests() {
-        List<HostRequest> hostRequests = List.of(hostRequest);
-        when(hostRequestRepository.findAll()).thenReturn(hostRequests);
-
-        List<HostRequest> result = hostService.getAllHostRequests();
+        List<HostRequestDTO> result = hostService.getAllHostRequests("ADMIN");
 
         assertEquals(1, result.size());
-        assertSame(hostRequest, result.get(0));
-        
-        verify(hostRequestRepository, times(1)).findAll();
     }
 
     @Test
-    void getAllHostRequests_Failure_ReturnEmpty() {
-        List<HostRequest> hostRequests = List.of();
-        when(hostRequestRepository.findAll()).thenReturn(hostRequests);
+    void getAllHostRequests_notAdmin_throwsForbidden() {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+            () -> hostService.getAllHostRequests("USER"));
 
-        List<HostRequest> result = hostService.getAllHostRequests();
-
-        assertEquals(0, result.size());
-        
-        verify(hostRequestRepository, times(1)).findAll();
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
 
     @Test
-    void getHostRequest_Success_ReturnHostRequest() {
-        when(hostRequestRepository.findById(hostRequest.getId())).
-            thenReturn(Optional.of(hostRequest));
+    void approveHostRequest_success() {
+        when(userRepository.findByEmail("admin@test.com"))
+            .thenReturn(Optional.of(admin));
+        when(hostRequestRepository.findById(10))
+            .thenReturn(Optional.of(hostRequest));
+        when(roleRepository.findByRoleName("HOST"))
+            .thenReturn(Optional.of(hostRole));
 
-        HostRequest result = hostService.getHostRequest(hostRequest.getId());
+        hostService.approveHostRequest(10, "admin@test.com", "ADMIN");
 
-        assertSame(hostRequest, result);
-        
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
+        assertEquals(HostRequestStatus.APPROVED, hostRequest.getStatus());
+        assertEquals(admin, hostRequest.getReviewedBy());
+        assertTrue(user.getRoles().contains(hostRole));
+
+        verify(notificationService).createNotification(eq(user), contains("approved"));
     }
 
     @Test
-    void getHostRequest_Failure_NotFound() {
-        when(hostRequestRepository.findById(hostRequest.getId())).
-            thenReturn(Optional.empty());
+    void approveHostRequest_alreadyProcessed_throwsBadRequest() {
+        hostRequest.setStatus(HostRequestStatus.APPROVED);
 
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class, 
-            () -> hostService.getHostRequest(hostRequest.getId()));
+        when(userRepository.findByEmail("admin@test.com"))
+            .thenReturn(Optional.of(admin));
+        when(hostRequestRepository.findById(10))
+            .thenReturn(Optional.of(hostRequest));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Host Request not found", exception.getReason());
-        
-        verify(hostRequestRepository, times(1)).findById(hostRequest.getId());
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+            () -> hostService.approveHostRequest(10, "admin@test.com", "ADMIN"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
     }
 
     @Test
-    void mapToDTO_Success_ReturnHostRequestDTO() {
-        HostRequestDTO expected = new HostRequestDTO();
-        expected.setId(hostRequest.getId());
-        expected.setStatus(hostRequest.getStatus());
-        expected.setUserId(user.getId());
-        expected.setRequestedAt(hostRequest.getRequestedAt());
-        expected.setReviewedBy(hostRequest.getReviewedBy().getId());
+    void denyHostRequest_success() {
+        when(userRepository.findByEmail("admin@test.com"))
+            .thenReturn(Optional.of(admin));
+        when(hostRequestRepository.findById(10))
+            .thenReturn(Optional.of(hostRequest));
 
-        HostRequestDTO result = hostService.mapToDTO(hostRequest);
+        hostService.denyHostRequest(10, "admin@test.com", "ADMIN");
 
-        assertEquals(expected, result);
+        assertEquals(HostRequestStatus.DENIED, hostRequest.getStatus());
+        assertEquals(admin, hostRequest.getReviewedBy());
+
+        verify(notificationService).createNotification(eq(user), contains("denied"));
     }
 
     @Test
-    void updateHostRequest_Success_ReturnHostRequest() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
-            .thenReturn(true);
+    void deleteHostRequest_creatorSuccess() {
+        when(hostRequestRepository.findById(10))
+            .thenReturn(Optional.of(hostRequest));
 
-        when(hostRequestRepository.save(hostRequest))
-            .thenReturn(hostRequest);
+        hostService.deleteHostRequest(10, "user@test.com", "USER");
 
-        HostRequest result = hostService.updateHostRequest(hostRequest);
-
-        assertEquals(hostRequest.getStatus(), result.getStatus());
-        assertEquals(hostRequest.getRequestedAt(), result.getRequestedAt());
-        assertEquals(hostRequest.getReviewedBy(), result.getReviewedBy());
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, times(1)).save(hostRequest);
+        verify(hostRequestRepository).delete(hostRequest);
     }
 
     @Test
-    void updateHostRequest_Failure_NotFound() {
-        when(hostRequestRepository.existsById(hostRequest.getId()))
-            .thenReturn(false);
+    void deleteHostRequest_notCreatorOrAdmin_throwsForbidden() {
+        when(hostRequestRepository.findById(10))
+            .thenReturn(Optional.of(hostRequest));
 
-        ResponseStatusException exception = assertThrows(
-            ResponseStatusException.class, 
-            () -> hostService.updateHostRequest(hostRequest));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+            () -> hostService.deleteHostRequest(10, "other@test.com", "USER"));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Host Request not found", exception.getReason());
-
-        verify(hostRequestRepository, times(1)).existsById(hostRequest.getId());
-        verify(hostRequestRepository, never()).save(any());
-
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
-
 }

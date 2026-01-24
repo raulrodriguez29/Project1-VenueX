@@ -41,6 +41,10 @@ public class BookingService {
 
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        
+        if ("CLOSED".equals(event.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS,"Event seats sold out");
+        }
 
         Booking booking = new Booking();
         booking.setUser(user);

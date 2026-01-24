@@ -12,10 +12,12 @@ import com.venuex.backend.DTO.BookingDTO;
 import com.venuex.backend.DTO.TicketDTO;
 import com.venuex.backend.DTO.TicketReturnDTO;
 import com.venuex.backend.entities.Booking;
+import com.venuex.backend.entities.Event;
 import com.venuex.backend.entities.EventSeatSection;
 import com.venuex.backend.entities.Payment;
 import com.venuex.backend.entities.Ticket;
 import com.venuex.backend.repository.BookingRepository;
+import com.venuex.backend.repository.EventRepository;
 import com.venuex.backend.repository.EventSeatSectionRepository;
 import com.venuex.backend.repository.PaymentRepository;
 import com.venuex.backend.repository.TicketRepository;
@@ -27,15 +29,21 @@ public class TicketService {
     private final BookingRepository bookingRepository;
     private final EventSeatSectionRepository eventSeatSectionRepository;
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
+    private final EventRepository eventRepository;
 
     public TicketService(TicketRepository ticketRepository,
                         BookingRepository bookingRepository,
                         EventSeatSectionRepository eventSeatSectionRepository,
-                        PaymentRepository paymentRepository) {
+                        PaymentRepository paymentRepository,
+                        NotificationService notificationService,
+                        EventRepository eventRepository) {
         this.ticketRepository = ticketRepository;
         this.bookingRepository = bookingRepository;
         this.eventSeatSectionRepository = eventSeatSectionRepository;
         this.paymentRepository = paymentRepository;
+        this.notificationService = notificationService;
+        this.eventRepository = eventRepository;
     }
 
     // User actions
@@ -72,6 +80,10 @@ public class TicketService {
                 .findByEvent_IdAndSeatSection_Type(booking.getEvent().getId(),req.getSeatSectionName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event seat section not found"));
 
+            if (req.getQuantity() > section.getRemainingCapacity()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Not enough seats available in section: " + req.getSeatSectionName());
+            }
             for (int i = 0; i < req.getQuantity(); i++) {
                 Ticket ticket = new Ticket();
                 ticket.setBooking(booking);
@@ -81,7 +93,18 @@ public class TicketService {
                 booking.getTickets().add(ticket);
                 total = total.add(section.getPrice());
             }
+            //decrement capicity
+            section.setRemainingCapacity(section.getRemainingCapacity() - req.getQuantity());
+            eventSeatSectionRepository.save(section);
         }
+        //close event if its sold out 
+        Event event = booking.getEvent();
+        boolean soldOut = event.getSeatSections().stream()
+            .allMatch(s -> s.getRemainingCapacity() == 0);
+        if (soldOut) {
+            event.setStatus("CLOSED");
+            eventRepository.save(event);
+        }   
         bookingRepository.save(booking);
         return new BookingDTO(
             booking.getId(),
@@ -115,6 +138,10 @@ public class TicketService {
         payment.setStatus(Payment.PaymentStatus.PAID);
         booking.setStatus(Booking.BookingStatus.BOOKED);
         paymentRepository.save(payment);
+        // CREATE NOTIFICATION HERE
+        notificationService.createNotification(
+            booking.getUser(),
+            "Your payment was successful! Your booking is confirmed.");
         return "PAID";
     }
 

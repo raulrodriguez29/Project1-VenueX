@@ -40,6 +40,12 @@ class TicketServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private EventRepository eventRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private TicketService ticketService;
 
@@ -69,9 +75,11 @@ class TicketServiceTest {
         // SeatSection and EventSeatSection
         SeatSection seatSection = new SeatSection();
         seatSection.setType("VIP");
+        seatSection.setCapacity(10);
 
         eventSeatSection = new EventSeatSection();
         eventSeatSection.setSeatSection(seatSection);
+        eventSeatSection.setRemainingCapacity(seatSection.getCapacity());
 
         // Ticket
         ticket1 = new Ticket();
@@ -85,6 +93,8 @@ class TicketServiceTest {
         vipSection.setEvent(event);
         vipSection.setSeatSection(seatSection);
         vipSection.setPrice(BigDecimal.valueOf(50));
+        vipSection.setRemainingCapacity(10);
+
     }
 
     // Get tickets
@@ -149,6 +159,8 @@ class TicketServiceTest {
         when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
         when(eventSeatSectionRepository.findByEvent_IdAndSeatSection_Type(20, "VIP"))
             .thenReturn(Optional.of(vipSection));
+        when(eventRepository.save(any(Event.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         BookingDTO result = ticketService.addTicketsToBooking(1, List.of(ticketRequest), "temp@gmail.com");

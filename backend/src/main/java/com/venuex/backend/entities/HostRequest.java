@@ -2,19 +2,15 @@ package com.venuex.backend.entities;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 @Entity
 @Table(name = "host_requests")
 public class HostRequest {
+    public enum HostRequestStatus {
+        PENDING,
+        APPROVED,
+        DENIED
+    }
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +20,17 @@ public class HostRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status; // PENDING, APPROVED, DENIED
+    private HostRequestStatus status;
 
-    @Column(name = "requested_at", columnDefinition = "TIMESTAMP")
-    private LocalDateTime requestedAt;
+    @Column(name = "requested_at", nullable = false)
+    private LocalDateTime requestedTime;
+    
+    @PrePersist
+    protected void onCreate() {
+        this.requestedTime = LocalDateTime.now();
+    }
 
     @ManyToOne(fetch = FetchType.LAZY, optional=true)
     @JoinColumn(name = "reviewed_by", nullable = true)
@@ -37,12 +39,12 @@ public class HostRequest {
     public HostRequest() {
     }
 
-    public HostRequest(Integer id, LocalDateTime requestedAt, User reviewedBy, String status, User user) {
+    public HostRequest(Integer id, User user,HostRequestStatus status, LocalDateTime requestedTime, User reviewedBy) {
         this.id = id;
-        this.requestedAt = requestedAt;
-        this.reviewedBy = reviewedBy;
-        this.status = status;
         this.user = user;
+        this.status = status;
+        this.requestedTime = requestedTime;
+        this.reviewedBy = reviewedBy;
     }
 
     public Integer getId() {
@@ -61,20 +63,20 @@ public class HostRequest {
         this.user = user;
     }
 
-    public String getStatus() {
+    public HostRequestStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(HostRequestStatus status) {
         this.status = status;
     }
 
-    public LocalDateTime getRequestedAt() {
-        return requestedAt;
+    public LocalDateTime getRequestedTime() {
+        return requestedTime;
     }
 
-    public void setRequestedAt(LocalDateTime requestedAt) {
-        this.requestedAt = requestedAt;
+    public void setRequestedTime(LocalDateTime requestedTime) {
+        this.requestedTime = requestedTime;
     }
 
     public User getReviewedBy() {

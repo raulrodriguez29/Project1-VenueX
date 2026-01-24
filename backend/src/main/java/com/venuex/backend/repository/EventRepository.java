@@ -50,4 +50,6 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
         void deleteExpiredEvents(@Param("cutoff") LocalDateTime cutoff);
 
     boolean existsByName(String name);
+
+    List<Event> findByCreatedById(Integer id);
 }

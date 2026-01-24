@@ -75,6 +75,19 @@ public class EventService {
         return convertToDTO(event);
     }
 
+    public List<EventDTO> getEventByCreator(String hostEmail) {
+        eventCleanupService.cleanupExpiredEvents();
+
+        User user = userRepository.findByEmail(hostEmail)
+            .orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Event> events = eventRepository.findByCreatedById(user.getId());
+        return events.stream()
+            .peek(event -> event.setStatus(eventStatus(event.getId())))
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+    
     public EventDTO addEvent(Event event, String hostEmail) {
         eventCleanupService.cleanupExpiredEvents();
         Integer venueId = event.getVenue().getId();
@@ -113,7 +126,7 @@ public class EventService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         
         if (!existingEvent.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not correct user ");
         }
         //name
         if (event.getName() != null) {

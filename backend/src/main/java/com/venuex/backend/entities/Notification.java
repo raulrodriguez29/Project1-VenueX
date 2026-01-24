@@ -8,6 +8,10 @@ import jakarta.persistence.*;
 @Table(name = "notifications")
 public class Notification {
 
+    public enum EmailType {
+        EMAIL
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -16,26 +20,23 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String type;
+    private EmailType type;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "sent_at", columnDefinition = "TIMESTAMP")
-    private LocalDateTime sentAt = LocalDateTime.now();
+    @Column(name = "sent_at", updatable = false, insertable = false)
+    private LocalDateTime sentAt;
 
     // Constructors
-    public Notification() {
+    public Notification() {}
 
-    }
-
-    public Notification(Integer id, User user, String type, String message) {
-        this.id = id;
+    public Notification(User user, EmailType type, String message) {
         this.user = user;
         this.type = type;
         this.message = message;
-        this.sentAt = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -53,10 +54,10 @@ public class Notification {
         this.user = user; 
     }
 
-    public String getType() {
+    public EmailType getType() {
         return type; 
     }
-    public void setType(String type) {
+    public void setType(EmailType type) {
         this.type = type; 
     }
 

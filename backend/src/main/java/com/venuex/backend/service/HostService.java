@@ -10,16 +10,32 @@ import org.springframework.web.server.ResponseStatusException;
 import com.venuex.backend.DTO.HostRequestDTO;
 import com.venuex.backend.entities.HostRequest;
 import com.venuex.backend.entities.User;
+import com.venuex.backend.entities.HostRequest.HostRequestStatus;
+import com.venuex.backend.entities.Role;
 import com.venuex.backend.repository.HostRequestRepository;
+import com.venuex.backend.repository.RoleRepository;
+import com.venuex.backend.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class HostService {
 
     private final HostRequestRepository hostRequestRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public HostService(HostRequestRepository hostRequestRepository) {
+    public HostService(
+        HostRequestRepository hostRequestRepository, 
+        UserRepository userRepository, 
+        RoleRepository roleRepository,
+        NotificationService notificationService) {
         this.hostRequestRepository = hostRequestRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.notificationService = notificationService;
     }
 
     //MAP TO DTO
@@ -27,72 +43,114 @@ public class HostService {
         HostRequestDTO hostRequestDTO = new HostRequestDTO();
         hostRequestDTO.setId(hostRequest.getId());
         hostRequestDTO.setUserId(hostRequest.getUser().getId());
-        hostRequestDTO.setStatus(hostRequest.getStatus());
-        hostRequestDTO.setRequestedAt(hostRequest.getRequestedAt());
-
-        if(hostRequest.getReviewedBy() != null) {
-            hostRequestDTO.setReviewedBy(hostRequest.getReviewedBy().getId());
-        } else {
-            hostRequestDTO.setReviewedBy(null);
-        }
+        hostRequestDTO.setRequestedTime(hostRequest.getRequestedTime());
 
         return hostRequestDTO;
     }
 
     //CREATE
-    public HostRequest createHostRequest(HostRequest hostRequest) {
-        if (hostRequestRepository.existsById(hostRequest.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Host Request already exists");
+    public String createHostRequest(String userEmail, String role) {
+        if (!"USER".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not a user");
         }
-        return hostRequestRepository.save(hostRequest);
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        //see if another request already exists 
+        boolean exists = hostRequestRepository
+            .existsByUserAndStatus(user, HostRequestStatus.PENDING);
+
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Host request already pending");
+        }
+        HostRequest newRequest = new HostRequest();
+        newRequest.setUser(user);
+        newRequest.setStatus(HostRequestStatus.PENDING);
+        hostRequestRepository.save(newRequest);
+        return "SUBMITTED";
     }
  
-    //READ
-    public HostRequest getHostRequest(Integer id) {
-        return hostRequestRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host Request not found"));
+    //Get all host request 
+    public List<HostRequestDTO> getAllHostRequests(String role) {
+        if (!"ADMIN".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a Admin");
+        }
+        return hostRequestRepository.findAll()
+            .stream()
+            .map(this::mapToDTO)
+            .toList();
     }
 
-    public List<HostRequest> getAllHostRequests() {
-        return hostRequestRepository.findAll();
-    }
+    @Transactional
+    public void approveHostRequest(Integer requestId, String adminEmail, String role) {
+        User admin = userRepository.findByEmail(adminEmail)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found"));
 
-    // ! CHECK IF BETTER WAY TO OBTAIN ADMIN !
-    //UPDATE / APPROVE / DENY
-    public HostRequest approveHostRequest(Integer id, User admin) { 
-        HostRequest hostRequest = hostRequestRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host Request not found"));
-
-        hostRequest.setStatus("APPROVED");
-        hostRequest.setReviewedBy(admin);
-
-        return hostRequestRepository.save(hostRequest);
-    }
-
-    public HostRequest denyHostRequest(Integer id, User admin) {
-        HostRequest hostRequest = hostRequestRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host Request not found"));
-
-        hostRequest.setStatus("DENIED");
-        hostRequest.setReviewedBy(admin);
-
-        return hostRequestRepository.save(hostRequest);
-    }
-
-    public HostRequest updateHostRequest(HostRequest hostRequest) {
-        if(!hostRequestRepository.existsById(hostRequest.getId())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host Request not found");
+        if (!"ADMIN".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a Admin");
         }
 
-        return hostRequestRepository.save(hostRequest);
+        HostRequest request = hostRequestRepository.findById(requestId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host request not found"));
+
+        if (request.getStatus() != HostRequestStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request already processed");
+        }
+
+        // Update request
+        request.setStatus(HostRequestStatus.APPROVED);
+        request.setReviewedBy(admin);
+
+        // Promote user to HOST
+        User user = request.getUser();
+        Role hostRole = roleRepository.findByRoleName("HOST")
+            .orElseThrow(() -> new RuntimeException("HOST role not found"));
+        user.getRoles().add(hostRole);
+
+        hostRequestRepository.save(request);
+        userRepository.save(user);
+        notificationService.createNotification(
+            user,
+            "Congratulations, Your request to be a host has been approved!");
     }
 
-    //DELETE
-    public void deleteHostRequest(Integer id) {
-        if(!hostRequestRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Host Request not found");
+    @Transactional
+    public void denyHostRequest(Integer requestId, String adminEmail, String role) {
+        User admin = userRepository.findByEmail(adminEmail)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found"));
+
+        if (!"ADMIN".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a Admin");
         }
-        hostRequestRepository.deleteById(id);
+
+        HostRequest request = hostRequestRepository.findById(requestId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host request not found"));
+
+        if (request.getStatus() != HostRequestStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request already processed");
+        }
+
+        // Update request
+        request.setStatus(HostRequestStatus.DENIED);
+        request.setReviewedBy(admin);
+        hostRequestRepository.save(request);
+
+        User user = request.getUser();
+        notificationService.createNotification(
+            user,
+            "We apologize, Your request to be a host has been denied!");
+    }
+
+    public void deleteHostRequest(Integer id, String userEmail, String role) {
+
+        HostRequest request = hostRequestRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host request not found"));
+
+        boolean isCreator = request.getUser().getEmail().equals(userEmail);
+        boolean isAdmin = role.equals("ADMIN");
+        if (!isCreator && !isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this host request");
+        }
+        hostRequestRepository.delete(request);
     }
 }

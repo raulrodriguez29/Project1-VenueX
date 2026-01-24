@@ -33,6 +33,12 @@ public class EventController {
         return eventService.getEventById(id);
     }
 
+    @GetMapping("host/events")
+    public List<EventDTO> getEventByCreator (HttpServletRequest request) {
+        String hostEmail = (String) request.getAttribute("userEmail");
+        return eventService.getEventByCreator(hostEmail);
+    }
+
     @PostMapping("/host/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventDTO addEvent(@RequestBody Event event, HttpServletRequest request) {
