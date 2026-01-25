@@ -71,6 +71,26 @@ export default function VenueCard({name, location, description}: VenueCardProps)
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>{description}</span>
             </div>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 justify-right rounded-full text-sm font-medium text-white transition-all hover:scale-105"
+                style={{
+                  background: "linear-gradient(135deg, #a87878, #797979)"
+                }}
+              >
+                {" "}
+                View Seat Sections{" "}
+              </button>
+              <button
+                className="px-4 py-2 rounded-full text-sm font-medium text-white transition-all hover:scale-105"
+                style={{
+                  background: "linear-gradient(135deg, #ff3366, #ff6699)"
+                }}
+              >
+                {" "}
+                Edit Venue{" "}
+              </button>
+            </div>
           </div>
         </div>
       </div>
