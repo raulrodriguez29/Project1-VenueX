@@ -1,5 +1,10 @@
 import axios from "axios";
 
+export const getSecretData = async () => {
+  const response = await api.get('/preotected-route');
+  return response.data;
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });

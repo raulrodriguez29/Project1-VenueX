@@ -25,3 +25,5 @@ dist-ssr
 
 # Contains sensitive information
 .env
+
+frontend/package-lock.json
