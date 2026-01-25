@@ -10,6 +10,7 @@ import Checkout from "./user/Checkout";
 import CreateVenue from "./pages/Venues/CreateVenue";
 import EventDetails from "./pages/EventDetails";
 import VenueDetails from "./pages/Venues/VenueDetails";
+import Profile from "./user/Profile";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/venues/:id" element={<VenueDetails />} />
+        <Route path="/profile/:id" element={<Profile />} />
       </Routes>
     </div>
   );

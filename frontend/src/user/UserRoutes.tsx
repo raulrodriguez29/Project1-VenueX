@@ -7,7 +7,7 @@ import Cart from "./Cart";
 import Checkout from "./Checkout";
 import Payments from "./Payments";
 import Notifications from "./Notifications";
-import { JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 
 export default function UserRoutes(): JSX.Element {
   return (
