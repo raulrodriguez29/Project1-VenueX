@@ -9,6 +9,7 @@ import Cart from "./user/Cart";
 import Checkout from "./user/Checkout";
 import CreateVenue from "./pages/Venues/CreateVenue";
 import EventDetails from "./pages/EventDetails";
+import CreateEvent from "./pages/CreateEvent";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/venues" element={<Venues />} />
         <Route path="/venues/create" element={<CreateVenue />} />
