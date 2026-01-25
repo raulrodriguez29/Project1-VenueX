@@ -2,25 +2,79 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getUserById } from '../api/user.api';
 import type { User } from '../types/User';
-// Import your components here
 import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/Footer";
+import { useAuth } from '../auth/AuthContext';
+import { updateUser } from '../api/auth.api';
 
 const Profile = () => {
     const { id } = useParams();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    
+    // NEW STATES FOR EDITING
+    const [isEditing, setIsEditing] = useState(false);
+
+    const [formData, setFormData] = useState({ 
+        firstName: '', 
+        lastName: '', 
+        phone: '', 
+        email: '' // Add this
+    });
 
     useEffect(() => {
         if (id) {
-            getUserById(Number(id))
-                .then(data => {
-                    setUser(data);
-                    setLoading(false);
-                })
-                .catch(() => setLoading(false));
+            getUserById(Number(id)).then(data => {
+                setUser(data);
+                setFormData({ 
+                    firstName: data.firstName, 
+                    lastName: data.lastName, 
+                    phone: data.phone || '',
+                    email: data.email // Add this
+                });
+                setLoading(false);
+            });
         }
     }, [id]);
+
+    const { login } = useAuth();
+
+    const handleSave = async () => {
+        try {
+            const response = await updateUser(Number(id), formData);
+            
+            // 1. Manually update the token in localStorage so future API calls work
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('email', response.email);
+                localStorage.setItem('firstName', response.firstName);
+                localStorage.setItem('lastName', response.lastName);
+                localStorage.setItem('phone', response.phone);
+            }
+
+            // 2. Call login with JUST the user data (one argument)
+            // Ensure the keys match your User interface
+            login({
+                id: response.id,
+                email: response.email,
+                firstName: response.firstName,
+                lastName: response.lastName,
+                phone: response.phone,
+                role: response.role // Make sure backend sends 'role'
+            });
+
+            setUser(response); // Update local state
+            setIsEditing(false);
+            alert("Profile updated successfully!");
+        } catch (error) {
+            console.error("Update failed", error);
+            alert("Failed to update profile.");
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">Loading...</div>;
     if (!user) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">User not found.</div>;
@@ -56,9 +110,6 @@ const Profile = () => {
                                             {user.firstName} {user.lastName}
                                         </h1>
                                         
-                                        <span className="bg-pink-500/10 text-pink-500 px-3 py-1 rounded-full text-xs font-bold border border-pink-500/20">
-                                            PRO MEMBER
-                                        </span>
                                     </div>
                                     <p className="text-gray-400 font-medium mt-1">@{user.email.split('@')[0]}</p>
                                 </div>
@@ -66,26 +117,86 @@ const Profile = () => {
 
                             {/* Info Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 -mt-4">
+                                {/* EMAIL */}
                                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                                     <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Email Address</p>
-                                    <p className="text-gray-200">{user.email}</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.email}</p>
+                                    )}
                                 </div>
+
+                                {/* PHONE */}
                                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                                     <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Phone Number</p>
-                                    <p className="text-gray-200">{user.phone || 'Not provided'}</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.phone || 'Not provided'}</p>
+                                    )}
+                                </div>
+
+                                {/* FIRST NAME - Only visible or editable if needed, but let's add them for full control */}
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">First Name</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="firstName"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.firstName}</p>
+                                    )}
+                                </div>
+
+                                {/* LAST NAME */}
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Last Name</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="lastName"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.lastName}</p>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Simple Action Buttons */}
                             <div className="flex flex-col gap-3 mt-8">
                                 <div className="flex gap-4">
-                                    <button className="flex-1 py-4 bg-white text-black font-bold rounded-xl hover:bg-pink-500 hover:text-white transition-all duration-300">
-                                        Edit Profile
-                                    </button>
-                                    <button className="flex-1 py-4 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/20 transition-all">
-                                        Change Password
-                                    </button>
+                                    {isEditing ? (
+                                        <>
+                                            <button onClick={handleSave} className="flex-1 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition-all">
+                                                Save Changes
+                                            </button>
+                                            <button onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/10 hover:bg-white/20 transition-all">
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => setIsEditing(true)} className="flex-1 py-4 bg-white text-black font-bold rounded-xl hover:bg-pink-500 hover:text-white transition-all duration-300">
+                                            Edit Profile
+                                        </button>
+                                    )}
                                 </div>
+                            </div>
                                     
                                 {/* Danger Zone */}
                                 <button className="w-full py-3 mt-2 text-red-500 text-sm font-semibold hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
@@ -95,7 +206,6 @@ const Profile = () => {
                         </div>
                     </div>
                 </div>
-            </div>
 
             <Footer />
         </>
