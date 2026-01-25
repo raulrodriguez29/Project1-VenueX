@@ -21,6 +21,15 @@ export default function TrendingEvents() {
           <h2 className="text-4xl font-extrabold text-white tracking-tight">
             Events
           </h2>
+          <RoleGate allow={["USER"]}>
+            <button
+              //onClick={() => navigate("/events/create")}
+              className="ml-auto px-5 py-2 rounded-full text-md font-semibold text-white transition-all hover:scale-105"
+              style={{
+                background: "linear-gradient(135deg, #ff3366, #ff6699)",}}>
+              Request to host an event
+            </button>
+          </RoleGate>
           {/* ONLY for host and admin*/}
           <RoleGate allow={["HOST", "ADMIN"]}>
             <button
