@@ -23,6 +23,10 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+.primary-text {
+      color: #720a24;
+}
+
 /* Animations */
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 20px rgba(255, 51, 102, 0.4); }
@@ -34,6 +38,10 @@ body {
 }
 
 /* Layout & Backgrounds */
+.primary-bg {
+      background-color: #720a24;
+    }
+
 .hero-gradient {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a0a 100%);
 }
@@ -111,6 +119,15 @@ body {
   transform: translateY(-8px) scale(1.02);
 }
 
+.booking-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(114, 10, 36, 0.12);
+}
+
+.booking-card {
+      transition: all 0.3s ease;
+}
+
 /* Dropdowns */
 .nav-dropdown {
   opacity: 0;
@@ -171,6 +188,15 @@ body {
   background-size: 80px 140px;
   background-position: 0 0, 0 0, 40px 70px, 40px 70px;
 }
+
+.profile-ring {
+      background: linear-gradient(135deg, #720a24 0%, #a01830 50%, #720a24 100%);
+      padding: 4px;
+    }
+
+.status-dot {
+      animation: pulse 2s infinite;
+    }
 
 /* Utility Colors */
 .text-brand {

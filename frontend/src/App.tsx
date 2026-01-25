@@ -3,6 +3,7 @@ import './App.css';
 import Home from "./pages/Home";
 import Login from "./pages/Login";       
 import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard"
 import Venues from "./pages/Venues/Venues";
 import Cart from "./user/Cart";
 import Checkout from "./user/Checkout";
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/venues" element={<Venues />} />
         <Route path="/venues/create" element={<CreateVenue />} />
         <Route path="/cart" element={<Cart />} />
