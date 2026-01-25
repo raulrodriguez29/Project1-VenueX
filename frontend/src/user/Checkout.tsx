@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 
 export default function Checkout(): JSX.Element {
   const navigate = useNavigate();

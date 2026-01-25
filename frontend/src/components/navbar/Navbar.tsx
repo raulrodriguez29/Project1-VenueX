@@ -1,4 +1,4 @@
-import {AuthButtons} from "./AuthButtons";
+import { UserActions } from "./UserActions";
 // import {UserActions} from "./UserActions";
 import { Link } from "react-router-dom";
 
@@ -59,7 +59,7 @@ export default function Navbar() {
           </div>
         </div>
       {/* Auth Buttons */}
-      <AuthButtons/>
+      <UserActions/>
   </div>
 </nav>
   );
