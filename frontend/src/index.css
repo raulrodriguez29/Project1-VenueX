@@ -1,13 +1,85 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: dark;
-}
-
 body {
-  margin: 0;
-  padding: 0;
-  background-color: #0a0a0a; /* Matches your theme */
-  color: white;
-  min-height: 100vh;
-}
+      box-sizing: border-box;
+    }
+    .font-display { font-family: 'Bebas Neue', cursive; }
+    .font-body { font-family: 'Inter', sans-serif; }
+
+    @view-transition { navigation: auto; }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 51, 102, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(255, 51, 102, 0.8); }
+    }
+    
+    .glow-button {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    .hero-gradient {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a0a 100%);
+    }
+    
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-8px) scale(1.02);
+    }
+    
+    .nav-dropdown {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+    }
+    
+    .nav-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .search-expanded {
+      width: 300px;
+    }
+    
+    .search-results {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .search-results.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .search-results::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .search-results::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+    
+    .search-results::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px;
+    }
+    
+    .geometric-pattern {
+      background-image: 
+        linear-gradient(30deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+        linear-gradient(150deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+        linear-gradient(30deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1)),
+        linear-gradient(150deg, rgba(255,51,102,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,51,102,0.1) 87.5%, rgba(255,51,102,0.1));
+      background-size: 80px 140px;
+      background-position: 0 0, 0 0, 40px 70px, 40px 70px;
+    }
