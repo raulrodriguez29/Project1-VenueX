@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllVenues } from "../../api/venue.api"; 
 import type { Venue } from "../../types/Venue";
+import RoleGate from "../../auth/RoleGate";
 
 const Venues = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -37,6 +38,7 @@ const Venues = () => {
             >
               VENUES
             </h2>
+            <RoleGate allow={["ADMIN"]}>
             {/*Plus Icon*/}
             <Link to="/venues/create">
               <button
@@ -48,6 +50,7 @@ const Venues = () => {
                 </svg>
               </button>
             </Link>
+            </RoleGate>
           </div>
           <ul
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -56,9 +59,7 @@ const Venues = () => {
             {venues.map((venue) => (
               <li key={venue.id}>
                 <VenueCard
-                  name={venue.name}
-                  location={venue.location}
-                  description={venue.description}
+                  venue={venue} 
                 />
               </li>
             ))}
