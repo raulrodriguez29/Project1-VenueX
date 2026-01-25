@@ -1,5 +1,7 @@
+import RoleGate from "../auth/RoleGate"
 import type { Event } from "../types/Events"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../auth/AuthContext"
 
 interface EventCardProps {
   event: Event
@@ -12,6 +14,8 @@ export default function EventCard({ event }: EventCardProps) {
     dateStyle: "medium",
     timeStyle: "short",
   })
+
+  const { isLoggedIn } = useAuth()
 
   const imageUrl = `https://picsum.photos/seed/${event.id}/400/300`;
   return (
@@ -60,17 +64,32 @@ export default function EventCard({ event }: EventCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-end">
+        <div className="mt-4 flex items-center justify-between">
+        {/* EDIT EVENT (LEFT) HOST stuff only*/}
+        <RoleGate allow={["HOST", "ADMIN"]}>
           <button
-            className="px-4 py-2 rounded-full text-sm font-medium text-white transition-all hover:scale-105"
+            className="px-4 py-2 rounded-full text-sm font-medium text-gray-300 border border-gray-600 hover:text-white hover:border-pink-400 transition-all"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/events/${event.id}/edit`)
+            }}>
+            Edit Event
+          </button>
+        </RoleGate>
+          {/* GET TICKETS (RIGHT) */}
+          <button
+            className="ml-auto px-4 py-2 rounded-full text-sm font-medium text-white transition-all hover:scale-105"
             style={{
               background: "linear-gradient(135deg, #ff3366, #ff6699)",
             }}
             onClick={(e) => {
               e.stopPropagation()
+              if (!isLoggedIn) {
+                navigate("/register")
+                return
+              }
               navigate(`/events/${event.id}`)
-            }}
-          >
+            }}>
             Get Tickets
           </button>
         </div>
