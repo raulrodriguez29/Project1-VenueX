@@ -1,5 +1,5 @@
 import axios from "axios";
-import api from "./axios";
+import api from "./axios.config";
 import type { Venue } from "../types/Venue";
 
 const BASE_URL = "http://localhost:8080";
