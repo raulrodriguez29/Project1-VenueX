@@ -1,48 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-type SeatSectionKey = "VIP" | "Premium" | "Floor" | "General";
-
-interface SelectionItem {
-  seatSectionName: SeatSectionKey;
-  quantity: number;
-  price: number;
-}
-
-interface StoredTicketSelection {
-  eventId: number;
-  selections: SelectionItem[];
-  total: number;
-  savedAt: string;
-}
-
-function formatMoney(n: number) {
-  const safe = Number.isFinite(n) ? n : 0;
-  return `$${safe.toFixed(2)}`;
-}
-
-function getLatestStoredSelection(): StoredTicketSelection | null {
-  // Find the most recent "venuex_ticket_selection_event_*" key in sessionStorage
-  const keys = Object.keys(sessionStorage).filter((k) =>
-    k.startsWith("venuex_ticket_selection_event_")
-  );
-
-  let latest: StoredTicketSelection | null = null;
-
-  for (const k of keys) {
-    try {
-      const parsed = JSON.parse(sessionStorage.getItem(k) || "null") as StoredTicketSelection | null;
-      if (!parsed?.savedAt) continue;
-      if (!latest || new Date(parsed.savedAt).getTime() > new Date(latest.savedAt).getTime()) {
-        latest = parsed;
-      }
-    } catch {
-      // ignore bad cache
-    }
-  }
-
-  return latest;
-}
+import type { JSX } from "react/jsx-runtime";
 
 export default function Checkout() {
   const navigate = useNavigate();
