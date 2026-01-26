@@ -14,14 +14,11 @@ import ContactForm from "./pages/ContactForm";
 import VenueDetails from "./pages/Venues/VenueDetails";
 import Profile from "./user/Profile";
 import EditVenue from "./pages/Venues/EditVenue";
-<<<<<<< HEAD
 import EditEvent from "./pages/EditEvent";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute";
-=======
 import Notifications from "./pages/Notifications";
 import HostRequests from "./pages/HostRequests";
->>>>>>> origin/ashlee_frontendVenues
 
 export default function App() {
   return (
