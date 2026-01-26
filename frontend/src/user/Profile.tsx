@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { changePassword, getUserById } from '../api/user.api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { changePassword, deleteUser, getUserById } from '../api/user.api';
 import type { User } from '../types/User';
 import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/Footer";
@@ -11,7 +11,7 @@ const Profile = () => {
     const { id } = useParams(); 
     const { login } = useAuth();
     //All states must be at the top
-    
+
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -27,7 +27,9 @@ const Profile = () => {
         phone: '', 
         email: '' 
     });
-    
+    const { logout } = useAuth(); // Make sure logout is pulled from useAuth
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (id) {
             getUserById(Number(id)).then(data => {
@@ -59,14 +61,14 @@ const Profile = () => {
             }
 
             // Call login with JUST the user data (one argument)
-            // Ensure the keys match your User interface
+            // Ensure the keys match our User interface
             login({
                 id: response.id,
                 email: response.email,
                 firstName: response.firstName,
                 lastName: response.lastName,
                 phone: response.phone,
-                role: response.role // Make sure backend sends 'role'
+                role: response.role 
             });
 
             setUser(response); // Update local state
@@ -127,6 +129,30 @@ const Profile = () => {
         }
     };
 
+    
+    // Delete account 
+    const handleDeleteAccount = async () => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete your account? This action is permanent and cannot be undone."
+        );
+
+        if (confirmed) {
+            try {
+                await deleteUser(Number(id));
+                alert("Your account has been successfully deleted.");
+                
+                // Clear the session
+                logout(); 
+                
+                // Send them to the landing page or login
+                navigate('/'); 
+            } catch (error: any) {
+                console.error("Delete failed:", error);
+                alert(error.response?.data?.message || "Failed to delete account. Please try again.");
+            }
+        }
+    };
+
     return (
         <>
             <Navbar />
@@ -162,36 +188,6 @@ const Profile = () => {
 
                             {/* Info Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 -mt-4">
-                                {/* EMAIL */}
-                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Email Address</p>
-                                    {isEditing ? (
-                                        <input 
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
-                                        />
-                                    ) : (
-                                        <p className="text-gray-200">{user.email}</p>
-                                    )}
-                                </div>
-
-                                {/* PHONE */}
-                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Phone Number</p>
-                                    {isEditing ? (
-                                        <input 
-                                            name="phone"
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
-                                        />
-                                    ) : (
-                                        <p className="text-gray-200">{user.phone || 'Not provided'}</p>
-                                    )}
-                                </div>
-
                                 {/* FIRST NAME - Only visible or editable if needed, but let's add them for full control */}
                                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                                     <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">First Name</p>
@@ -219,6 +215,36 @@ const Profile = () => {
                                         />
                                     ) : (
                                         <p className="text-gray-200">{user.lastName}</p>
+                                    )}
+                                </div>
+
+                                {/* EMAIL */}
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Email Address</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.email}</p>
+                                    )}
+                                </div>
+
+                                {/* PHONE */}
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <p className="text-xs text-pink-500 font-bold uppercase tracking-widest mb-1">Phone Number</p>
+                                    {isEditing ? (
+                                        <input 
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            className="bg-transparent border-b border-pink-500/50 outline-none w-full text-gray-200 focus:border-pink-500 transition-colors"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-200">{user.phone || 'Not provided'}</p>
                                     )}
                                 </div>
                             </div>
@@ -280,7 +306,10 @@ const Profile = () => {
                             )}
                                     
                                 {/* Danger Zone */}
-                                <button className="w-full py-3 mt-2 text-red-500 text-sm font-semibold hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+                                <button 
+                                    onClick={handleDeleteAccount}
+                                    className="w-full py-3 mt-2 text-red-500 text-sm font-semibold hover:bg-red-600 hover:text-white rounded-xl transition-all border border-red-500/20 hover:border-red-600 shadow-sm hover:shadow-red-500/20"
+                                    >
                                     Delete Account
                                 </button>
                             </div>

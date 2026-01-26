@@ -13,3 +13,9 @@ export const changePassword = async (id: number, passwordData: any) => {
     });
     return response.data;
 };
+
+export const deleteUser = async (id: number) => {
+    // Axios will send the JWT in the header automatically
+    const response = await api.delete(`/user/${id}`);
+    return response.data;
+};
