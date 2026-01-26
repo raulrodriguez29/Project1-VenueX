@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUserById } from '../api/user.api';
+import { changePassword, getUserById } from '../api/user.api';
 import type { User } from '../types/User';
 import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/Footer";
@@ -8,20 +8,26 @@ import { useAuth } from '../auth/AuthContext';
 import { updateUser } from '../api/auth.api';
 
 const Profile = () => {
-    const { id } = useParams();
+    const { id } = useParams(); 
+    const { login } = useAuth();
+    //All states must be at the top
+    
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    
-    // NEW STATES FOR EDITING
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
     const [isEditing, setIsEditing] = useState(false);
-
     const [formData, setFormData] = useState({ 
         firstName: '', 
         lastName: '', 
         phone: '', 
-        email: '' // Add this
+        email: '' 
     });
-
+    
     useEffect(() => {
         if (id) {
             getUserById(Number(id)).then(data => {
@@ -30,20 +36,20 @@ const Profile = () => {
                     firstName: data.firstName, 
                     lastName: data.lastName, 
                     phone: data.phone || '',
-                    email: data.email // Add this
+                    email: data.email 
                 });
                 setLoading(false);
             });
         }
     }, [id]);
 
-    const { login } = useAuth();
+
 
     const handleSave = async () => {
         try {
             const response = await updateUser(Number(id), formData);
             
-            // 1. Manually update the token in localStorage so future API calls work
+            // Manually update the token in localStorage so future API calls work
             if (response.token) {
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('email', response.email);
@@ -52,7 +58,7 @@ const Profile = () => {
                 localStorage.setItem('phone', response.phone);
             }
 
-            // 2. Call login with JUST the user data (one argument)
+            // Call login with JUST the user data (one argument)
             // Ensure the keys match your User interface
             login({
                 id: response.id,
@@ -81,6 +87,45 @@ const Profile = () => {
 
     // Helper for initials to keep the JSX clean
     const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`;
+
+    // Edit password functionality
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    };
+
+    const saveNewPassword = async () => {
+        // Basic Validation
+        if (!passwordData.currentPassword || !passwordData.newPassword) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            alert("New passwords do not match!");
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            alert("New password must be at least 6 characters long.");
+            return;
+        }
+
+        try {
+            // Call the API
+            await changePassword(Number(id), passwordData);
+        
+            //  Success!
+            alert("Password updated successfully!");
+            setIsChangingPassword(false);
+            
+            // Clear the fields for security
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error: any) {
+            console.error("Password update failed:", error);
+            // This will catch if the "currentPassword" was wrong on the backend
+            alert(error.response?.data?.message || "Failed to update password. Is your current password correct?");
+        }
+    };
 
     return (
         <>
@@ -177,26 +222,62 @@ const Profile = () => {
                                     )}
                                 </div>
                             </div>
+                            
+                            {isChangingPassword && (
+                                <div className="mt-4 p-6 bg-white/5 rounded-2xl border border-pink-500/20 animate-in fade-in duration-300">
+                                    <h3 className="text-lg font-bold mb-4 text-pink-500">Change Password</h3>
+                                    <div className="space-y-4">
+                                        <input 
+                                            type="password" 
+                                            name="currentPassword"
+                                            placeholder="Current Password"
+                                            onChange={handlePasswordChange}
+                                            className="w-full bg-[#0a0a0a] border border-white/10 p-3 rounded-xl outline-none focus:border-pink-500"
+                                        />
+                                        <input 
+                                            type="password" 
+                                            name="newPassword"
+                                            placeholder="New Password"
+                                            onChange={handlePasswordChange}
+                                            className="w-full bg-[#0a0a0a] border border-white/10 p-3 rounded-xl outline-none focus:border-pink-500"
+                                        />
+                                        <input 
+                                            type="password" 
+                                            name="confirmPassword"
+                                            placeholder="Confirm New Password"
+                                            onChange={handlePasswordChange}
+                                            className="w-full bg-[#0a0a0a] border border-white/10 p-3 rounded-xl outline-none focus:border-pink-500"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button onClick={saveNewPassword} className="flex-1 py-3 bg-pink-500 font-bold rounded-xl">Update Password</button>
+                                            <button onClick={() => setIsChangingPassword(false)} className="px-6 py-3 bg-white/10 rounded-xl">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Simple Action Buttons */}
-                            <div className="flex flex-col gap-3 mt-8">
-                                <div className="flex gap-4">
-                                    {isEditing ? (
-                                        <>
-                                            <button onClick={handleSave} className="flex-1 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition-all">
-                                                Save Changes
-                                            </button>
-                                            <button onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/10 hover:bg-white/20 transition-all">
-                                                Cancel
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button onClick={() => setIsEditing(true)} className="flex-1 py-4 bg-white text-black font-bold rounded-xl hover:bg-pink-500 hover:text-white transition-all duration-300">
-                                            Edit Profile
-                                        </button>
-                                    )}
+                            {!isChangingPassword && (
+                                <div className="flex flex-col gap-3 mt-8">
+                                    <div className="flex gap-4">
+                                        {isEditing ? (
+                                            <>
+                                                <button onClick={handleSave} className="flex-1 py-4 bg-green-600 text-white font-bold rounded-xl">Save Changes</button>
+                                                <button onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-white/10 text-white font-bold rounded-xl">Cancel</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => setIsEditing(true)} className="flex-1 py-4 bg-white text-black font-bold rounded-xl hover:bg-pink-500 hover:text-white transition-all">
+                                                    Edit Profile
+                                                </button>
+                                                <button onClick={() => setIsChangingPassword(true)} className="flex-1 py-4 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/10 transition-all">
+                                                    Change Password
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                                     
                                 {/* Danger Zone */}
                                 <button className="w-full py-3 mt-2 text-red-500 text-sm font-semibold hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
