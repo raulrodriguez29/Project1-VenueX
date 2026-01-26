@@ -5,26 +5,40 @@ import type { User } from '../types/User';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState<User[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
+            // Only show the full-page loading spinner on the first load
+            // For subsequent searches, we might want a smaller loading indicator
+            if (searchTerm === "") setLoading(true); 
+
             try {
-                const response = await api.get('/admin/users');
-                console.log("Admin Data Fetch Successful:");
-                console.table(response.data); // This makes debugging the response easy!
+                // DYNAMIC URL: If there is a search term, use the search endpoint
+                const url = searchTerm 
+                    ? `/admin/users/search?query=${encodeURIComponent(searchTerm)}` 
+                    : '/admin/users';
+
+                const response = await api.get(url);
                 setUsers(response.data);
+                setError(null); // Clear errors if the fetch succeeds
             } catch (err: any) {
                 console.error("Admin Fetch Error:", err);
-                setError(err.response?.data?.message || "Unauthorized or Server Error");
+                setError(err.response?.data?.message || "Failed to fetch users");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchUsers();
-    }, []);
+        // DEBOUNCE: Don't hammer the server on every keystroke
+        const delayDebounceFn = setTimeout(() => {
+            fetchUsers();
+        }, 400); 
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]); // <--- Adding this makes the effect run every time the user types
 
     if (loading) return <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">Loading Admin Data...</div>;
 
@@ -46,6 +60,44 @@ const AdminDashboard = () => {
                     </header>
 
                     <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                        {/* Search Bar Container */}
+                        <div className="mb-8 max-w-md">
+                            <div className="relative group">
+                                {/* Search Icon */}
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-500 group-focus-within:text-pink-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+
+                                {/* The Input - This is where 'searchTerm' and 'setSearchTerm' are used */}
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or email..."
+                                    value={searchTerm} // <--- Value is read here
+                                    onChange={(e) => setSearchTerm(e.target.value)} // <--- Value is updated here
+                                    className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all border-white/5 hover:border-white/20"
+                                />
+
+                                {/* Clear Button - only shows when there is text */}
+                                {searchTerm && (
+                                    <button 
+                                        onClick={() => setSearchTerm("")}
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        <span className="text-xs font-bold uppercase tracking-tighter">Clear</span>
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Optional: Results count indicator */}
+                            {searchTerm && !loading && (
+                                <p className="text-xs text-gray-500 mt-2 ml-2">
+                                    Found {users.length} results for "{searchTerm}"
+                                </p>
+                            )}
+                        </div>
+                        
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
