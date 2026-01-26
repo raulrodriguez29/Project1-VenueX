@@ -8,10 +8,7 @@ import Cart from "./Cart";
 import Checkout from "./Checkout";
 import Payments from "./Payments";
 import Notifications from "./Notifications";
-<<<<<<< HEAD
 import type { JSX } from "react/jsx-runtime";
-=======
->>>>>>> origin/arjun_bookPayTicket
 
 export default function UserRoutes() {
   return (
