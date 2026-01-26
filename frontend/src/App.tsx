@@ -15,6 +15,7 @@ import VenueDetails from "./pages/Venues/VenueDetails";
 import Profile from "./user/Profile";
 import EditVenue from "./pages/Venues/EditVenue";
 import Notifications from "./pages/Notifications";
+import HostRequests from "./pages/HostRequests";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/venues" element={<Venues />} />
         <Route path="/venues/create" element={<CreateVenue />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/host-requests" element={<HostRequests />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/events/:id" element={<EventDetails />} />
