@@ -18,11 +18,11 @@ export interface RegisterData {
     phone?: string;
 }
 
-const API_URL = 'http://localhost:8080/api/auth'; 
+//const API_URL = 'http://localhost:8080/api/auth'; 
 
 export const registerUser = async (userData: RegisterData): Promise<AuthResponse> => {
     try {
-        const response = await api.post(`${API_URL}/register`, userData);
+        const response = await api.post(`/auth/register`, userData);
         
         const data = response.data;
         
@@ -53,7 +53,7 @@ export interface LoginData {
 
 export const loginUser = async (credentials: LoginData): Promise<AuthResponse> => {
     try {
-        const response = await api.post(`${API_URL}/login`, credentials);
+        const response = await api.post(`/auth/login`, credentials);
         
         const data = response.data;
         // ADD THIS LINE

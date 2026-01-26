@@ -1,8 +1,13 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
 import { UserActions } from "./UserActions";
 // import {UserActions} from "./UserActions";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
+const { user } = useAuth();
+const navigate = useNavigate();
+
   return (
     <nav
     className="fixed top-0 left-0 right-0 z-50 nav-bg border-b border-white/10"
@@ -59,7 +64,12 @@ export default function Navbar() {
           </div>
         </div>
       {/* Auth Buttons */}
-      <UserActions/>
+      <UserActions 
+          // use user?.id to safely get the ID if user exists
+          onProfileClick={() => navigate(`/profile/${user?.id}`)}
+          // we can also pass other props if needed
+          //onCartClick={() => navigate('/cart')}
+        />
   </div>
 </nav>
   );

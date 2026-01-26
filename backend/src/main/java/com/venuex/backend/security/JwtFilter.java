@@ -36,8 +36,17 @@ public class JwtFilter implements Filter{
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        String path = httpRequest.getRequestURI();
 
+        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+            httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+            httpResponse.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            return; // STOP HERE! Do not call chain.doFilter()
+        }
+
+        String path = httpRequest.getRequestURI();
         // Whitelist
         if (whiteList.stream().anyMatch(path::startsWith)) {
             chain.doFilter(request, response);

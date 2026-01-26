@@ -11,6 +11,9 @@ import CreateVenue from "./pages/Venues/CreateVenue";
 import EventDetails from "./pages/EventDetails";
 import CreateEvent from "./pages/CreateEvent";
 import ContactForm from "./pages/ContactForm";
+import VenueDetails from "./pages/Venues/VenueDetails";
+import Profile from "./user/Profile";
+import EditVenue from "./pages/Venues/EditVenue";
 
 export default function App() {
   return (
@@ -27,6 +30,9 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/events/:id" element={<EventDetails />} />
+        <Route path="/venues/:id" element={<VenueDetails />} />
+        <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/venues/:id/edit" element={< EditVenue />} />
       </Routes>
     </div>
   );
