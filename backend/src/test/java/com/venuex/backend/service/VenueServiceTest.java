@@ -73,7 +73,7 @@ public class VenueServiceTest {
         assertEquals("stadium", result.get(0).getName());
         assertEquals("plano", result.get(0).getLocation());
         assertEquals("place in plano", result.get(0).getDescription());
-        verify(venueRepository, times(1)).findAll();
+        verify(venueRepository, times(2)).findAll();
     }
 
     @Test
@@ -81,7 +81,7 @@ public class VenueServiceTest {
         when(venueRepository.findAll()).thenReturn(List.of());
         List<Venue> result = venueService.getAllVenues();
         assertEquals(0, result.size());
-        verify(venueRepository, times(1)).findAll();
+        verify(venueRepository, times(2)).findAll();
     }
 
     @Test

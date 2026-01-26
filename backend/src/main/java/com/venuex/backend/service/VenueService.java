@@ -23,6 +23,14 @@ public class VenueService {
 
     //Venue get methods 
     public List<Venue> getAllVenues() {
+        List<Venue> venues = venueRepository.findAll();
+
+        for (Venue venue : venues) {
+            List<SeatSection> sections = seatSectionRepository.findByVenueId(venue.getId());
+            if (sections.isEmpty()) {
+                venueRepository.delete(venue);
+            }
+        }
         return venueRepository.findAll();
     }
 
