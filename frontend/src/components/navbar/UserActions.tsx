@@ -1,14 +1,17 @@
-import {CartIcon} from "./Icons";
+import {CartIcon, HostRequestIcon} from "./Icons";
 import {ProfileIcon} from "./Icons";
 import {InboxIcon} from "./Icons";
 import { useAuth } from "../../auth/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import RoleGate from "../../auth/RoleGate";
 
 type UserActionsProps = {
   cartCount?: number
   inboxCount?: number
+  hostRequestCount?: number
   onCartClick?: () => void
   onInboxClick?: () => void
+  onHostRequestClick?: () => void
   onProfileClick?: () => void
 }
 
@@ -53,9 +56,11 @@ const ActionButton = ({
 export const UserActions = ({
   cartCount = 0,
   inboxCount = 0,
+  hostRequestCount = 0,
   onCartClick,
   onInboxClick,
   onProfileClick,
+  onHostRequestClick
 }: UserActionsProps) => {
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
@@ -70,10 +75,19 @@ export const UserActions = ({
             {cartCount > 0 && <Badge count={cartCount} />}
           </ActionButton>
 
-          <ActionButton onClick={onInboxClick} ariaLabel="Messages">
-            <InboxIcon />
-            {inboxCount > 0 && <Badge count={inboxCount} />}
-          </ActionButton>
+          <RoleGate allow={["ADMIN"]}>
+            <ActionButton onClick={onHostRequestClick} ariaLabel="Host requests">
+              <HostRequestIcon/>
+              {hostRequestCount > 0 && <Badge count={hostRequestCount} />}
+            </ActionButton>
+          </RoleGate>
+
+          <Link to="/notifications">
+            <ActionButton onClick={onInboxClick} ariaLabel="Messages">
+              <InboxIcon />
+              {inboxCount > 0 && <Badge count={inboxCount} />}
+            </ActionButton>
+          </Link>
 
           <ProfileButton onClick={onProfileClick} />
           
