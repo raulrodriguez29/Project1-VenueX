@@ -53,9 +53,6 @@ export default function CreateVenue() {
     setError(null);
 
     try {
-      // create the venue
-      console.log("TOKEN:", localStorage.getItem('token') ? "✅ EXISTS" : "❌ MISSING");
-      console.log("ROLE:", localStorage.getItem('role'));
       const { data } = await createVenue(formData);
       setCreatedVenue(data); // keep the venue so we can create sections for it
     } catch (err) {
@@ -195,7 +192,7 @@ export default function CreateVenue() {
             <form onSubmit={handleSectionSubmit} className="space-y-4">
               {["VIP", "Premium", "Floor", "General"].map((type) => (
                 <div key={type} className="flex items-center gap-4">
-                  <label className="w-24">{type}</label>
+                  <label className="w-24 text-black">{type}</label>
                   <input
                     type="number"
                     name={type}

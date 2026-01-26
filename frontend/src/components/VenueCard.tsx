@@ -85,10 +85,12 @@ export default function VenueCard({venue}: VenueCardProps) {
               <RoleGate allow={["ADMIN"]}>
                 <button
                   className="px-4 py-2 rounded-full text-sm font-medium text-white transition-all hover:scale-105"
-                  style={{
-                    background: "linear-gradient(135deg, #ff3366, #ff6699)"
+                  style={{background: "linear-gradient(135deg, #ff3366, #ff6699)"}}
+                  onClick={(e) => {
+                  e.stopPropagation()
+                    navigate(`/venues/${venue.id}/edit`)
                   }}>
-                  Edit Venue{" "}
+                  Edit Venue
                 </button>
             </RoleGate>
             </div>

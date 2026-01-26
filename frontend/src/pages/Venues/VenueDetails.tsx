@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { getVenueById, getSeatSections } from "../../api/venue.api"
 import type { Venue } from "../../types/Venue"
 import type { SeatSection } from "../../types/SeatSection"
+import Navbar from "../../components/navbar/Navbar"
 
 export default function VenueDetails() {
   const { id } = useParams()
@@ -10,6 +11,10 @@ export default function VenueDetails() {
   const [seatSections, setSeatSections] = useState<SeatSection[]>([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const SECTION_ORDER = ["VIP", "Premium", "Floor", "General"];
+  const sortedSeatSections = [...seatSections].sort(
+    (a, b) =>
+      SECTION_ORDER.indexOf(a.type) - SECTION_ORDER.indexOf(b.type));
 
   useEffect(() => {
     if (!id || isNaN(Number(id))) return
@@ -34,6 +39,8 @@ export default function VenueDetails() {
   }
 
   return (
+    <>
+    <Navbar />
     <div className="max-w-6xl mx-auto py-25 px-6 text-white">
       {/* Venue Name */}
       <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
@@ -77,7 +84,7 @@ export default function VenueDetails() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {seatSections.map((section) => (
+          {sortedSeatSections.map((section) => (
             <div
               key={section.id}
               className="rounded-xl border border-gray-700 p-6 bg-[#1a1a1a]"
@@ -107,5 +114,6 @@ export default function VenueDetails() {
         </button>
       </div>
     </div>
+    </>
   )
 }
