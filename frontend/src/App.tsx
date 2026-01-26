@@ -14,6 +14,7 @@ import ContactForm from "./pages/ContactForm";
 import VenueDetails from "./pages/Venues/VenueDetails";
 import Profile from "./user/Profile";
 import EditVenue from "./pages/Venues/EditVenue";
+import EditEvent from "./pages/EditEvent";
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/venues/:id" element={<VenueDetails />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/venues/:id/edit" element={< EditVenue />} />
+        <Route path="/events/:id/edit" element={<EditEvent />} />
       </Routes>
     </div>
   );
