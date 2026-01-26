@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, } from "react-router-dom";
 import './App.css';
 import Home from "./pages/Home";
 import Login from "./pages/Login";       
@@ -8,6 +8,8 @@ import Cart from "./user/Cart";
 import Checkout from "./user/Checkout";
 import EventDetails from "./pages/EventDetails";
 import Profile from "./user/Profile";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute";
 
 export default function App() {
   return (
@@ -21,6 +23,7 @@ export default function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
       </Routes>
     </div>
   );
