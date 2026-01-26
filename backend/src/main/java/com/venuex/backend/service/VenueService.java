@@ -41,10 +41,10 @@ public class VenueService {
 
     //create, update, delete only by ADMINS
     public Venue createVenue(Venue venue) {
-        if (venueRepository.existsByName(venue.getName().toLowerCase())) {
+        if (venueRepository.existsByName(venue.getName().toUpperCase())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");
         }
-        if (venue.getName() != null) venue.setName(venue.getName().toLowerCase());
+        if (venue.getName() != null) venue.setName(venue.getName().toUpperCase());
         if (venue.getLocation() != null) venue.setLocation(venue.getLocation().toLowerCase());
         if (venue.getDescription() != null) venue.setDescription(venue.getDescription().toLowerCase());
         return venueRepository.save(venue);
@@ -55,7 +55,7 @@ public class VenueService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found"));
 
         if (updatedVenue.getName() != null) {
-            String newName = updatedVenue.getName().toLowerCase();
+            String newName = updatedVenue.getName().toUpperCase();
 
             if (!existingVenue.getName().equals(newName) && venueRepository.existsByName(newName)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue already exists");

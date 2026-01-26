@@ -134,7 +134,7 @@ public class EventService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         
         if (!existingEvent.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not correct user ");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not correct user ");
         }
         //name
         if (event.getName() != null) {
@@ -175,7 +175,7 @@ public class EventService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
     
         if (!existingEvent.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not correct user ");
         }
         eventRepository.delete(existingEvent);
     }
@@ -224,7 +224,7 @@ public class EventService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
         if (!event.getCreatedBy().getEmail().equals(hostEmail) && !role.equals("ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not correct user ");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not correct user ");
         }
 
         if (event.getSeatSections() == null || event.getSeatSections().isEmpty()) {

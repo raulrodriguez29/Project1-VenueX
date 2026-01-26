@@ -34,9 +34,6 @@ export default function Navbar() {
               onClick={() => navigate('/venues')}>
               <span>Venues</span>
             </button>
-            <button className="px-4 py-2 rounded-full text-sm font-semibold text-gray-300 hover:text-white transition-colors" style={{ backgroundColor: "#1a1a1a", border: "1px solid #333" }}>
-              <span>Events</span>
-            </button>
 
             {/* --- ADMIN BUTTON START --- */}
             <RoleGate allow={["ADMIN", "ROLE_ADMIN"]}>
