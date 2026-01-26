@@ -1,6 +1,48 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { JSX } from "react/jsx-runtime";
+
+type SeatSectionKey = "VIP" | "Premium" | "Floor" | "General";
+
+interface SelectionItem {
+  seatSectionName: SeatSectionKey;
+  quantity: number;
+  price: number;
+}
+
+interface StoredTicketSelection {
+  eventId: number;
+  selections: SelectionItem[];
+  total: number;
+  savedAt: string;
+}
+
+function formatMoney(n: number) {
+  const safe = Number.isFinite(n) ? n : 0;
+  return `$${safe.toFixed(2)}`;
+}
+
+function getLatestStoredSelection(): StoredTicketSelection | null {
+  // Find the most recent "venuex_ticket_selection_event_*" key in sessionStorage
+  const keys = Object.keys(sessionStorage).filter((k) =>
+    k.startsWith("venuex_ticket_selection_event_")
+  );
+
+  let latest: StoredTicketSelection | null = null;
+
+  for (const k of keys) {
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem(k) || "null") as StoredTicketSelection | null;
+      if (!parsed?.savedAt) continue;
+      if (!latest || new Date(parsed.savedAt).getTime() > new Date(latest.savedAt).getTime()) {
+        latest = parsed;
+      }
+    } catch {
+      // ignore bad cache
+    }
+  }
+
+  return latest;
+}
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -93,10 +135,15 @@ export default function Checkout() {
             </div>
 
             <button
-              className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
               onClick={() => navigate("/user/cart")}
+              className="relative w-full max-w-xs mx-auto py-3 rounded font-semibold transition"
+              style={{
+                background: "linear-gradient(135deg, #ff3366, #ff6699)",
+              }}
             >
-              Back to Cart
+              <span className="absolute inset-0 flex items-center justify-center text-black">
+                Back to Cart
+              </span>
             </button>
           </div>
 

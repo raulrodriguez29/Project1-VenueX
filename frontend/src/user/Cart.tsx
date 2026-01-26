@@ -143,7 +143,7 @@ export default function Cart() {
                 </button>
 
                 <button
-                  onClick={() => navigate("/venues")}
+                  onClick={() => navigate("/dashboard")}
                   className="px-6 py-2 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
                 >
                   Browse Events
@@ -162,7 +162,7 @@ export default function Cart() {
               <h2 className="text-xl font-semibold text-gray-800">Your cart is empty</h2>
               <p className="text-gray-600">Add tickets from an event to begin.</p>
               <button
-                onClick={() => navigate("/venues")}
+                onClick={() => navigate("/dashboard")}
                 className="px-6 py-2 rounded text-white font-semibold"
                 style={{
                   background: "linear-gradient(135deg, #ff3366, #ff6699)",
