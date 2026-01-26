@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { logoutUser } from '../api/auth.api';
 import type { User } from '../types/User.ts';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
     isLoggedIn: boolean;
@@ -12,6 +13,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const navigate = useNavigate();
+
     // Initialize user from localStorage in one shot
     const [user, setUser] = useState<User | null>(() => {
         const id = localStorage.getItem('id');
@@ -41,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         logoutUser();    // Clears localStorage via your api helper
         setUser(null);   // Updates the UI instantly
+        navigate('/'); // Navigates back to home page regardless of where we are in app
     };
 
     return (

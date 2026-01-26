@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, } from "react-router-dom";
 import './App.css';
 import Home from "./pages/Home";
 import Login from "./pages/Login";       
@@ -15,6 +15,8 @@ import VenueDetails from "./pages/Venues/VenueDetails";
 import Profile from "./user/Profile";
 import EditVenue from "./pages/Venues/EditVenue";
 import EditEvent from "./pages/EditEvent";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute";
 
 export default function App() {
   return (
@@ -35,6 +37,7 @@ export default function App() {
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/venues/:id/edit" element={< EditVenue />} />
         <Route path="/events/:id/edit" element={<EditEvent />} />
+        <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
       </Routes>
     </div>
   );

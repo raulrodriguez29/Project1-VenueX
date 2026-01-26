@@ -28,7 +28,7 @@ public class UserController {
     }
 
     // GET ALL USERS
-    @GetMapping("/admin/user")
+    @GetMapping("/admin/users")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 
         // Get the list from the service
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     //SEARCH BY EMAIL, FIRST, OR LAST NAME
-    @GetMapping("/admin/user/search")
+    @GetMapping("/admin/users/search")
     public ResponseEntity<List<UserResponseDTO>> searchUsers(@RequestParam String query) {
 
         // Call service with the search term
