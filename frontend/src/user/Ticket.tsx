@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { EventSeatSectionDTO, getEventSeatSections } from "../api/eventSeatSections.api";
+import { getEventSeatSections } from "../api/eventSeatSections.api";
+import type { EventSeatSectionDTO } from "../api/eventSeatSections.api";
 
 type SeatSectionKey = "VIP" | "Premium" | "Floor" | "General";
 

@@ -1,4 +1,4 @@
-import { Routes, Route, } from "react-router-dom";
+import { Routes, Route, Navigate, } from "react-router-dom";
 import './App.css';
 import Home from "./pages/Home";
 import Login from "./pages/Login";       
@@ -19,6 +19,9 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute";
 import Notifications from "./pages/Notifications";
 import HostRequests from "./pages/HostRequests";
+import UserRoutes from "./user/UserRoutes";
+import Bookings from "./user/Bookings";
+import Ticket from "./user/Ticket";
 
 export default function App() {
   return (
@@ -42,6 +45,13 @@ export default function App() {
         <Route path="/venues/:id/edit" element={< EditVenue />} />
         <Route path="/events/:id/edit" element={<EditEvent />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+        <Route path="/user/*" element={<UserRoutes />} />
+
+        <Route path="/cart" element={<Navigate to="/user/cart" replace />} />
+        <Route path="/checkout" element={<Navigate to="/user/checkout" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="bookings" element={<Bookings />} />
+        <Route path="/events/:eventId/tickets" element={<Ticket />} />
       </Routes>
     </div>
   );
