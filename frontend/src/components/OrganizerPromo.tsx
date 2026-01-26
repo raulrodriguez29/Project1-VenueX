@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+ 
 export default function OrganizerPromo() {
   return (
     <section
@@ -36,14 +38,16 @@ export default function OrganizerPromo() {
           analytics.
         </p>
         <div className="flex flex-wrap gap-4 pt-4 justify-center">
-          <button
-            id="get-in-touch-btn"
-            className="px-8 py-4 rounded-full text-lg font-bold text-white transition-all hover:scale-105"
-            style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
-          >
-            {" "}
-            Get in Touch{" "}
-          </button>
+          <Link to="/contact-form">
+            <button
+              id="get-in-touch-btn"
+              className="px-8 py-4 rounded-full text-lg font-bold text-white transition-all hover:scale-105"
+              style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+            >
+              {" "}
+              Get in Touch{" "}
+            </button>
+          </Link>
         </div>
       </div>
     </div>

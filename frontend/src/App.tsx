@@ -9,6 +9,8 @@ import Cart from "./user/Cart";
 import Checkout from "./user/Checkout";
 import CreateVenue from "./pages/Venues/CreateVenue";
 import EventDetails from "./pages/EventDetails";
+import CreateEvent from "./pages/CreateEvent";
+import ContactForm from "./pages/ContactForm";
 import VenueDetails from "./pages/Venues/VenueDetails";
 import Profile from "./user/Profile";
 import EditVenue from "./pages/Venues/EditVenue";
@@ -20,6 +22,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/create-event" element={<CreateEvent />} />
+        <Route path="/contact-form" element={<ContactForm />} />
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/venues" element={<Venues />} />
         <Route path="/venues/create" element={<CreateVenue />} />
