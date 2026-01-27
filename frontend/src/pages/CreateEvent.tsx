@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from "../components/navbar/Navbar";
 import Blank from "../components/Blank";
-import Calendar from "../components/Calendar/Calendar";
 import Footer from "../components/Footer";
 import { useNavigate } from 'react-router-dom';
 import { createEvent, createEventSeatSections } from "../api/events.api"; 
@@ -250,7 +249,6 @@ export default function CreateEvent() {
           <div className="pt-2"></div>
           <div className="flex">
             <div className="w-1/3">
-              <Calendar />
             </div>
           </div>
 
