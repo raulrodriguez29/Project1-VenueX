@@ -3,8 +3,26 @@ import Blank from "../components/Blank";
 import Footer from "../components/Footer";
 import HostRequestCard from "../components/HostRequestCard"
 
-export default function HostRequests() {
+import { useEffect, useState } from "react";
+import { getAllHostRequests } from "../api/hostRequests.api";
+import type { HostRequest } from "../types/HostRequest";
 
+
+export default function HostRequests() {
+  const [hostRequests, setHostRequests] = useState<HostRequest[]>([]);
+  
+    useEffect(() => {
+      loadHostRequests();
+    }, []);
+
+  const loadHostRequests= async () => {
+    try {
+      const res = await getAllHostRequests();
+      setHostRequests(res.data);
+    } catch (error) {
+      console.error("Failed to fetch host requests", error);
+    }
+  };
 
   return (
 <>
@@ -21,10 +39,19 @@ export default function HostRequests() {
     </div>
     {/* Host Requests List */}
     <div className="space-y-4">
-        <HostRequestCard />
-        <HostRequestCard />
+        <ul>
+          {hostRequests.map((hostRequest) => (
+            <li
+            data-hostRequest-id={hostRequest.id}
+            className="notification-card rounded-xl p-6"
+          >
+            <HostRequestCard
+              hostRequest={hostRequest}
+            />
+            </li>
+          ))}
+        </ul>
     </div>
-
     </Blank>
     <Footer />
 </>

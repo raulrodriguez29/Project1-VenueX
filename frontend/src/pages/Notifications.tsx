@@ -3,14 +3,30 @@ import Blank from "../components/Blank";
 import Footer from "../components/Footer";
 import NotificationCard from "../components/NotificationCard";
 
-export default function Notifications() {
+import { useEffect, useState } from "react";
+import { getAllNotifications } from "../api/notifications.api";
+import type { Notification } from "../types/Notification";
 
+export default function Notifications({}) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const res = await getAllNotifications();
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
 
   return (
 <>
     <Navbar />
     <Blank>
-    <>
     <div className="mb-8">
     <h2
       className="font-display text-5xl md:text-6xl tracking-wide mb-3"
@@ -22,11 +38,18 @@ export default function Notifications() {
   </div>
   {/* Notifications List */}
   <div className="space-y-4">
-    <NotificationCard />
-    <NotificationCard />
+    <ul>
+      {notifications.map((notification) => (
+        <li 
+        key={notification.id}
+        data-notification-id={notification.id}>
+          <NotificationCard
+            notification={notification}
+          />
+        </li>
+      ))}
+    </ul>
   </div>
-</>
-
     </Blank>
     <Footer />
 </>

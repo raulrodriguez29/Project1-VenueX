@@ -1,18 +1,32 @@
 import { NotificationIcon } from "./navbar/Icons";
+import { useNavigate } from "react-router-dom";
+import type { Notification } from "../types/Notification";
 
-export default function NotificationCard() {
+import { deleteNotification } from "../api/notifications.api";
 
-    function deleteNotification(id : number) { // this function does a really cool animation
-      const notification = document.querySelector(`[data-notification-id="${id}"]`);
-      if (notification) {
-        notification.classList.add('notification-removing');
-        
-        // Remove from DOM after animation completes
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }
+interface Props {
+    notification: Notification
+}
+
+export default function NotificationCard({notification}: Props) {
+    const navigate = useNavigate()
+
+    function animateDelete (id : number) { // this function does a really cool animation
+        const notification = document.querySelector(`[data-notification-id="${id}"]`);
+        if (notification) {
+            notification.classList.add('notification-removing');
+        }
     }
+    
+    async function handleDelete(id: number): Promise<void> {
+        animateDelete(id);
+        try {
+            await deleteNotification(id);
+
+        } catch (err) {
+            console.error("Failed to delete notification", err);
+        }
+    };
     
     return(
         <div
@@ -31,17 +45,17 @@ export default function NotificationCard() {
                 <div className="flex items-start justify-between gap-4 mb-2">
                 <div>
                     <h3 className="font-semibold text-gray-900 text-lg">
-                    Booking Confirmed
+                    Notification Alert
                     </h3>
                     <p className="text-sm text-gray-500">Event Host</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-400 whitespace-nowrap">
-                    2 hours ago
+                    {notification.sentAt}
                     </span>{" "}
                     <button
                     className="delete-btn w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                    onClick={() => deleteNotification(1)}
+                    onClick={() => handleDelete(notification.id)}
                     >
                     <svg
                         className="w-5 h-5"
@@ -60,9 +74,7 @@ export default function NotificationCard() {
                 </div>
                 </div>
                 <p className="text-gray-700 leading-relaxed" id="notification-1-body">
-                Your booking for AURORA - What Happened to the Heart Tour at Madison
-                Square Garden on March 15, 2025 has been confirmed. Check your email
-                for your tickets and event details.
+                {notification.message}
                 </p>
             </div>
             </div>

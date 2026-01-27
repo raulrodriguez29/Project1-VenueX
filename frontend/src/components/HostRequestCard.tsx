@@ -1,24 +1,69 @@
 import { ProfileIcon } from "../components/navbar/Icons";
+import type { HostRequest } from "../types/HostRequest";
+import type { User } from "../types/User";
+import { deleteHostRequest, approveHostRequest, denyHostRequest } from "../api/hostRequests.api";
+import { useState, useEffect } from "react";
+import { getUserById } from "../api/user.api";
 
-export default function HostRequestCard() {
+interface Props {
+  hostRequest: HostRequest
+}
 
-    function deleteNotification(id : number) { // this function does a really cool animation
-      const notification = document.querySelector(`[data-notification-id="${id}"]`);
-      if (notification) {
-        notification.classList.add('notification-removing');
-        
-        // Remove from DOM after animation completes
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }
+export default function HostRequestCard({hostRequest}: Props) {
+
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getUserById(hostRequest.userId)
+      .then(setUser)
+      .finally(() => setLoading(false));
+  }, [hostRequest.userId]);
+
+  if (loading) return <div>Loading...</div>;
+
+  function animateDelete (id : number) { // this function does a really cool animation
+    const hostRequest = document.querySelector(`[data-hostRequest-id="${id}"]`);
+    if (hostRequest) {
+        hostRequest.classList.add('notification-removing');
     }
+  };
+
+async function handleDelete(id: number): Promise<void> {
+    animateDelete(id);
+    try {
+        await deleteHostRequest(id);
+
+    } catch (err) {
+        console.error("Failed to delete host request", err);
+    }
+};
+
+const handleApprove = async () => {
+  try {
+    await approveHostRequest(hostRequest.id, {
+      status: "APPROVED",
+    });
+  } catch (err) {
+    console.error("Failed to approve host request", err);
+  }
+};
+
+const handleDeny = async () => {
+  try {
+    await denyHostRequest(hostRequest.id, {
+      status: "DENIED",
+    });
+  } catch (err) {
+    console.error("Failed to deny host request", err);
+  }
+};
     
     return(
         <div
   className="notification-card notification-unread card-hover rounded-xl p-6 shadow-sm"
   style={{ backgroundColor: "#f5f5f5" }}
-  data-notification-id={1}
+  data-hostRequest-id={hostRequest.id}
 >
   <div className="flex items-start gap-4">
     <div
@@ -33,15 +78,15 @@ export default function HostRequestCard() {
           <h3 className="font-semibold text-gray-900 text-lg">
             New Host Request
           </h3>
-          <p className="text-sm text-gray-500">Sarah Williams</p>
+          <p className="text-sm text-gray-500">USERID: {hostRequest.userId}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-400 whitespace-nowrap">
-            2 hours ago
+            {hostRequest.requestedAt}
           </span>{" "}
           <button
             className="delete-btn w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
-            onClick={() => deleteNotification(1)}
+            onClick={() => handleDelete(hostRequest.id)}
           >
             <svg
               className="w-5 h-5"
@@ -63,11 +108,11 @@ export default function HostRequestCard() {
         className="text-gray-700 leading-relaxed mb-4"
         id="notification-1-body"
       >
-        Sarah Williams has requested to become a Host.
+        {user?.firstName} {user?.lastName} has requested to become a Host.
       </p>
       <div className="flex gap-3">
         <button
-          // onClick={() => approveRequest(1)}
+          onClick={handleApprove}
           className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
           style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
         >
@@ -86,11 +131,11 @@ export default function HostRequestCard() {
                 d="M5 13l4 4L19 7"
               />
             </svg>{" "}
-            Approve{" "}
+            Approve{""}
           </span>{" "}
         </button>{" "}
         <button
-          // onClick={() => denyRequest(1)}
+          onClick={handleDeny}
           className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
           style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
         >
