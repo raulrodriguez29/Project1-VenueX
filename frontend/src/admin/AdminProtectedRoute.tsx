@@ -6,9 +6,10 @@ const AdminProtectedRoute = ({ children }: { children: JSX.Element }) => {
     const { user, isLoggedIn } = useAuth();
 
     // Check if the user has the required role
-    const isAdmin = user?.role === "ROLE_ADMIN" || user?.role === "ADMIN";
+    const hasAccess = user?.role === "SUPER_USER" || user?.role === "ADMIN";
+    
 
-    if (!isLoggedIn || !isAdmin) {
+    if (!isLoggedIn || !hasAccess) {
         console.warn("Access denied: Not an admin");
         return <Navigate to="/" replace />;
     }

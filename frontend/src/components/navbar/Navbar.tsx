@@ -1,7 +1,7 @@
-import { useNavigate, Link } from "react-router-dom"; // Added Link
+import { useNavigate, Link } from "react-router-dom"; 
 import { useAuth } from "../../auth/AuthContext";
 import { UserActions } from "./UserActions";
-import RoleGate from "../../auth/RoleGate"; // Adjust this path to where your teammate's file is
+import RoleGate from "../../auth/RoleGate"; 
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ export default function Navbar() {
             </button>
 
             {/* --- ADMIN BUTTON START --- */}
-            <RoleGate allow={["ADMIN", "ROLE_ADMIN"]}>
+            <RoleGate allow={["ADMIN", "SUPER_USER"]}>
               <Link
                 to="/admin"
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-pink-500 hover:bg-pink-500/10 transition-all"

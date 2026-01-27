@@ -59,6 +59,9 @@ public class JwtFilter implements Filter{
 
             if (jwtUtil.validateToken(token)) {
                 String role = jwtUtil.extractRole(token);
+                String email = jwtUtil.extractEmail(token);
+                httpRequest.setAttribute("userEmail", email);
+                httpRequest.setAttribute("userRole", role);
 
                 // SUPER_USER Bypass
                 if (role.equals("SUPER_USER")) {
@@ -88,9 +91,7 @@ public class JwtFilter implements Filter{
                 }
 
                 // Success!
-                String email = jwtUtil.extractEmail(token);
-                httpRequest.setAttribute("userEmail", email);
-                httpRequest.setAttribute("userRole", role);
+
                 chain.doFilter(request, response);
             } else {
                 // Token was present but failed validation (expired/tampered)

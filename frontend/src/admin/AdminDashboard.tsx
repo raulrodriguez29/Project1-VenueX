@@ -8,6 +8,69 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [menuUser, setMenuUser] = useState<User | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: ''
+    });
+
+    // Function to transition from Choice Menu to Edit Form
+    const handleEditClick = () => {
+        if (!menuUser) return;
+        setEditForm({
+            firstName: menuUser.firstName,
+            lastName: menuUser.lastName,
+            email: menuUser.email,
+            phone: menuUser.phone || ''
+        });
+        setIsEditing(true);
+        // We keep menuUser set so we know WHO we are editing, 
+        // but we'll show the form instead of the choice buttons.
+    };
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!menuUser) return;
+
+        try {
+            const response = await api.put(`/user/${menuUser.id}`, editForm); 
+            const updatedUser = response.data;
+
+            // Update the table locally
+            setUsers(prev => prev.map(u => 
+                u.id === menuUser.id ? {
+                    ...u,
+                    firstName: updatedUser.firstName,
+                    lastName: updatedUser.lastName,
+                    email: updatedUser.email,
+                    phone: updatedUser.phone
+                } : u
+            ));
+            
+            setMenuUser(null);
+            setIsEditing(false);
+            console.log("Admin update successful");
+        } catch (err: any) {
+            console.error("Update error:", err);
+            alert(err.response?.data?.message || "Check console for 404/405 error");
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+        try {
+            await api.delete(`/user/${id}`);
+            setUsers(prev => prev.filter(user => user.id !== id));
+            setMenuUser(null);
+            console.log("User deleted successfully");
+        } catch (err) {
+            console.error("Delete error:", err);
+            alert("Failed to delete user.");
+        }
+    };
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -97,14 +160,14 @@ const AdminDashboard = () => {
                                 </p>
                             )}
                         </div>
-                        
+
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-white/5 text-pink-500 text-xs uppercase tracking-[0.2em] font-bold">
                                         <th className="p-5">ID</th>
-                                        <th className="p-5">First Name</th> {/* Split */}
-                                        <th className="p-5">Last Name</th>  {/* Split */}
+                                        <th className="p-5">First Name</th> 
+                                        <th className="p-5">Last Name</th>  
                                         <th className="p-5">Email Address</th>
                                         <th className="p-5">Phone</th>
                                         <th className="p-5 text-right">Control</th>
@@ -114,17 +177,15 @@ const AdminDashboard = () => {
                                     {users.map((u) => (
                                         <tr key={u.id} className="hover:bg-white/[0.03] transition-colors group">
                                             <td className="p-5 text-gray-500 font-mono text-sm">#{u.id}</td>
-                                            
-                                            {/* Separate columns for names */}
                                             <td className="p-5 font-semibold text-gray-200">{u.firstName}</td>
                                             <td className="p-5 font-semibold text-gray-200">{u.lastName}</td>
-                                            
                                             <td className="p-5 text-gray-400">{u.email}</td>
-                                            <td className="p-5 text-gray-400">
-                                                {u.phone || <span className="opacity-30">---</span>}
-                                            </td>
+                                            <td className="p-5 text-gray-400">{u.phone || <span className="opacity-30">---</span>}</td>
                                             <td className="p-5 text-right">
-                                                <button className="text-xs font-bold text-gray-400 group-hover:text-pink-500 transition-colors uppercase tracking-widest">
+                                                <button 
+                                                    onClick={() => setMenuUser(u)}
+                                                    className="text-xs font-bold text-gray-400 hover:text-pink-500 transition-colors uppercase tracking-widest px-3 py-1 rounded-md border border-white/5 hover:border-pink-500/30"
+                                                >
                                                     Manage
                                                 </button>
                                             </td>
@@ -135,6 +196,78 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 </div>
+                {menuUser && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => { setMenuUser(null); setIsEditing(false); }} />
+                        
+                        <div className="relative bg-[#111] border border-white/10 p-8 rounded-3xl max-w-md w-full shadow-2xl">
+                            <h3 className="text-xl font-bold text-white mb-6">
+                                {isEditing ? 'Edit User Details' : 'Manage User'}
+                            </h3>
+
+                            {isEditing ? (
+                                /* THE EDIT FORM */
+                                <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+                                    <div>
+                                        <label className="text-xs text-gray-500 uppercase ml-1">First Name</label>
+                                        <input 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-pink-500/50 outline-none"
+                                            value={editForm.firstName}
+                                            onChange={e => setEditForm({...editForm, firstName: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500 uppercase ml-1">Last Name</label>
+                                        <input 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-pink-500/50 outline-none"
+                                            value={editForm.lastName}
+                                            onChange={e => setEditForm({...editForm, lastName: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500 uppercase ml-1">Email Address</label>
+                                        <input 
+                                            type="email"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-pink-500/50 outline-none"
+                                            value={editForm.email}
+                                            onChange={e => setEditForm({...editForm, email: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500 uppercase ml-1">Phone Number</label>
+                                        <input 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-pink-500/50 outline-none"
+                                            value={editForm.phone}
+                                            onChange={e => setEditForm({...editForm, phone: e.target.value})}
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex gap-3 mt-4">
+                                        <button type="submit" className="flex-1 py-3 bg-pink-600 hover:bg-pink-500 text-white rounded-xl font-bold transition-colors">
+                                            Save Changes
+                                        </button>
+                                        <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 bg-white/5 text-gray-400 rounded-xl hover:text-white transition-colors">
+                                            Back
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                /* THE INITIAL CHOICE MENU */
+                                <div className="flex flex-col gap-3">
+                                    <button onClick={handleEditClick} className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold border border-white/10 transition-all hover:scale-[1.02]">
+                                        Edit Profile Details
+                                    </button>
+                                    <button onClick={() => handleDelete(menuUser.id)} className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-semibold border border-red-500/20 transition-all hover:scale-[1.02]">
+                                        Delete Account
+                                    </button>
+                                    <button onClick={() => setMenuUser(null)} className="mt-4 text-gray-500 hover:text-white text-xs uppercase tracking-widest transition-colors">
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
