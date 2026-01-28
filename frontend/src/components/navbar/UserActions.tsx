@@ -76,14 +76,14 @@ export const UserActions = ({
           </ActionButton>
 
           <RoleGate allow={["ADMIN"]}>
-            <ActionButton onClick={onHostRequestClick} ariaLabel="Host requests">
+            <ActionButton onClick={() => navigate("/host-requests")} ariaLabel="Host requests">
               <HostRequestIcon/>
               {hostRequestCount > 0 && <Badge count={hostRequestCount} />}
             </ActionButton>
           </RoleGate>
 
           <Link to="/notifications">
-            <ActionButton onClick={onInboxClick} ariaLabel="Messages">
+            <ActionButton onClick={() => navigate("/notifications")} ariaLabel="Messages">
               <InboxIcon />
               {inboxCount > 0 && <Badge count={inboxCount} />}
             </ActionButton>

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { UserActions } from "./UserActions";
-// import {UserActions} from "./UserActions";
 import { Link } from "react-router-dom";
+import VenueXLogo from "./VenueXLogo";
 
 export default function Navbar() {
 const { user } = useAuth();
@@ -20,14 +20,9 @@ const navigate = useNavigate();
         <div className="flex items-center gap-2">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+            style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)", borderRadius: "0.25rem" }}
           >
-            <svg
-              className="w-6 h-6 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-            </svg>
+            <VenueXLogo />
           </div>
           <span
             className="font-display text-2xl tracking-wider"

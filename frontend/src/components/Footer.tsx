@@ -31,8 +31,7 @@ export default function Footer() {
             </span>
           </div>
           <p className="text-gray-400 mb-6 max-w-sm" id="footer-tagline">
-            Your gateway to unforgettable live music experiences. Discover,
-            book, and enjoy concerts worldwide.
+            Your gateway to unforgettable live music experiences. Life Is Short. Enjoy It Live.
           </p>
           <div className="flex gap-4">
             <a
