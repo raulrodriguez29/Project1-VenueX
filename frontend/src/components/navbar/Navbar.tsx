@@ -21,9 +21,7 @@ export default function Navbar() {
               className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
             >
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-              </svg>
+              <VenueXLogo />
             </div>
             <span className="font-display text-2xl tracking-wider" style={{ color: "#ff3366" }}>
               VENUEX
