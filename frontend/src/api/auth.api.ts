@@ -83,3 +83,9 @@ export const logoutUser = () => {
     localStorage.removeItem('lastName');
     localStorage.removeItem('phone');
 };
+
+export const updateUser = async (id: number, data: any) => {
+    // Axios interceptor should automatically add the Authorization header
+    const response = await api.put(`/user/${id}`, data);
+    return response.data; // This is the AuthResponse with the new token
+};

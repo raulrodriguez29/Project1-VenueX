@@ -6,14 +6,14 @@ export interface SeatSection {
   venue: Venue;        
 }
 
-export interface CreateSeatSectionRequest {
-  type: string;
-  capacity: number;
-};
-
 export interface SeatSectionForm {
   VIP?: number;
   Premium?: number;
   Floor?: number;
   General?: number;
+}
+
+export interface CreateSeatSectionRequest {
+  type: string;
+  capacity: number;
 }

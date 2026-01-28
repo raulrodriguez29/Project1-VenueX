@@ -1,71 +1,61 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; 
 import { useAuth } from "../../auth/AuthContext";
 import { UserActions } from "./UserActions";
-import { Link } from "react-router-dom";
 import VenueXLogo from "./VenueXLogo";
+import RoleGate from "../../auth/RoleGate"; 
 
 export default function Navbar() {
-const { user } = useAuth();
-const navigate = useNavigate();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <nav
-    className="fixed top-0 left-0 right-0 z-50 nav-bg border-b border-white/10"
-    style={{ backgroundColor: "rgba(0,0,0,0.95)", backdropFilter: "blur(20px)" }}
+      className="fixed top-0 left-0 right-0 z-50 nav-bg border-b border-white/10"
+      style={{ backgroundColor: "rgba(0,0,0,0.95)", backdropFilter: "blur(20px)" }}
     >
-  <div className=" flex flex-nowrap row-gap:px-30 justify-between max-w-6xl mx-auto px-8 sm:px-12 lg:px-16">
-    <div className="flex items-center justify-between h-16 gap-4 ">
-      {/* Logo */}
-      <Link to="/">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)", borderRadius: "0.25rem" }}
-          >
-            <VenueXLogo />
-          </div>
-          <span
-            className="font-display text-2xl tracking-wider"
-            id="logo-text"
-            style={{ color: "#ff3366" }}
-          >
-            VENUEX
-          </span>
-        </div>
-      </Link>
-        <div id = "offcenter-navbar" className ="flex gap-4 relative left-2">  
-          <div className="relative">
-            <Link to="/venues">
-              <button
-                id="venues-btn"
-                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-gray-300 hover:text-white transition-colors"
-                style={{ backgroundColor: "#1a1a1a", border: "1px solid #333" }}
-              >
-                {" "}
-                <span>Venues</span>
-              </button>
-            </Link>
-          </div>
-          <div className="relative">
-            <button
-              id="events-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-gray-300 hover:text-white transition-colors"
-              style={{ backgroundColor: "#1a1a1a", border: "1px solid #333" }}
+      <div className="flex flex-nowrap justify-between max-w-6xl mx-auto px-8 sm:px-12 lg:px-16 items-center h-16">
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
             >
-              {" "}
-              <span>Events</span>
-            </button>
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+            <span className="font-display text-2xl tracking-wider" style={{ color: "#ff3366" }}>
+              VENUEX
+            </span>
           </div>
+
+          <div id="offcenter-navbar" className="flex gap-4 relative left-2">
+            <button className="px-4 py-2 rounded-full text-sm font-semibold text-gray-300 hover:text-white transition-colors" style={{ backgroundColor: "#1a1a1a", border: "1px solid #333" }}
+              onClick={() => navigate('/venues')}>
+              <span>Venues</span>
+            </button>
+
+            {/* --- ADMIN BUTTON START --- */}
+            <RoleGate allow={["ADMIN", "SUPER_USER"]}>
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-pink-500 hover:bg-pink-500/10 transition-all"
+                style={{ border: "1px solid rgba(255, 51, 102, 0.3)" }}
+              >
+                <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse"></span>
+                Admin
+              </Link>
+            </RoleGate>
+            {/* --- ADMIN BUTTON END --- */}
           </div>
         </div>
-      {/* Auth Buttons */}
-      <UserActions 
-          // use user?.id to safely get the ID if user exists
+
+        {/* Auth Buttons */}
+        <UserActions 
           onProfileClick={() => navigate(`/profile/${user?.id}`)}
-          // we can also pass other props if needed
-          //onCartClick={() => navigate('/cart')}
         />
-  </div>
-</nav>
+      </div>
+    </nav>
   );
 }
