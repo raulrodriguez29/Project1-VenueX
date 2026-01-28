@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { submitPayment } from "../api/checkout.api";
 
 type SeatSectionKey = "VIP" | "Premium" | "Floor" | "General";
 
@@ -22,7 +23,6 @@ function formatMoney(n: number) {
 }
 
 function getLatestStoredSelection(): StoredTicketSelection | null {
-  // Find the most recent "venuex_ticket_selection_event_*" key in sessionStorage
   const keys = Object.keys(sessionStorage).filter((k) =>
     k.startsWith("venuex_ticket_selection_event_")
   );
@@ -31,9 +31,17 @@ function getLatestStoredSelection(): StoredTicketSelection | null {
 
   for (const k of keys) {
     try {
-      const parsed = JSON.parse(sessionStorage.getItem(k) || "null") as StoredTicketSelection | null;
+      const parsed = JSON.parse(
+        sessionStorage.getItem(k) || "null"
+      ) as StoredTicketSelection | null;
+
       if (!parsed?.savedAt) continue;
-      if (!latest || new Date(parsed.savedAt).getTime() > new Date(latest.savedAt).getTime()) {
+
+      if (
+        !latest ||
+        new Date(parsed.savedAt).getTime() >
+          new Date(latest.savedAt).getTime()
+      ) {
         latest = parsed;
       }
     } catch {
@@ -46,17 +54,52 @@ function getLatestStoredSelection(): StoredTicketSelection | null {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as
+    | { selections?: SelectionItem[]; eventId?: number; bookingId?: number }
+    | undefined;
 
-  const cart = useMemo(() => getLatestStoredSelection(), []);
+  const bookingId = locationState?.bookingId;
+
+  // Use location.state if available, otherwise fall back to sessionStorage
+  const cart = useMemo<StoredTicketSelection | null>(() => {
+    if (locationState?.selections && locationState.eventId) {
+      return {
+        eventId: locationState.eventId,
+        selections: locationState.selections,
+        total: locationState.selections.reduce(
+          (sum, i) => sum + i.price * i.quantity,
+          0
+        ),
+        savedAt: new Date().toISOString(),
+      };
+    }
+    return getLatestStoredSelection();
+  }, [locationState]);
+
   const items = cart?.selections ?? [];
 
-  const subtotal = useMemo(() => {
-    return items.reduce((sum, i) => sum + i.quantity * i.price, 0);
-  }, [items]);
+  const subtotal = useMemo(
+    () => items.reduce((sum, i) => sum + i.quantity * i.price, 0),
+    [items]
+  );
 
-  // Mock fees/taxes (optional)
-  const serviceFee = useMemo(() => (subtotal > 0 ? Math.max(2.5, subtotal * 0.06) : 0), [subtotal]);
+  const serviceFee = useMemo(
+    () => (subtotal > 0 ? Math.max(2.5, subtotal * 0.08) : 0),
+    [subtotal]
+  );
+
   const total = useMemo(() => subtotal + serviceFee, [subtotal, serviceFee]);
+
+  // Persist cart in sessionStorage
+  useEffect(() => {
+    if (cart) {
+      sessionStorage.setItem(
+        `venuex_ticket_selection_event_${cart.eventId}`,
+        JSON.stringify(cart)
+      );
+    }
+  }, [cart]);
 
   // Payment form state
   const [nameOnCard, setNameOnCard] = useState("");
@@ -73,12 +116,11 @@ export default function Checkout() {
     const digits = cardNumber.replace(/\D/g, "");
     const cvvDigits = cvv.replace(/\D/g, "");
     const zipDigits = zip.replace(/\D/g, "");
-
     const expiryOk = /^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry.trim());
 
     return (
       nameOnCard.trim().length >= 2 &&
-      digits.length >= 12 && // allow non-strict for mock
+      digits.length >= 12 &&
       expiryOk &&
       (cvvDigits.length === 3 || cvvDigits.length === 4) &&
       zipDigits.length >= 5
@@ -87,25 +129,20 @@ export default function Checkout() {
 
   const handlePay = async () => {
     setError(null);
-
     if (!canSubmit) {
       setError("Please fill out all payment fields correctly.");
+      return;
+    }
+    if (bookingId === undefined) {
+      setError("Booking ID is missing.");
       return;
     }
 
     try {
       setSubmitting(true);
-
-      // Mock payment submission:
-      // If you already have a backend payment endpoint, call it here.
-      // Example:
-      // await submitPayment({ bookingId, amount: total, paymentMethod: "CREDIT_CARD" });
-
-      await new Promise((r) => setTimeout(r, 600));
-
-      // Success UX
-      // You can redirect to a confirmation page if you have one
-      navigate("/user/cart");
+      const status = await submitPayment(bookingId);
+      console.log(status);
+      navigate("/");
     } catch (e) {
       console.error(e);
       setError("Payment failed. Please try again.");
@@ -119,7 +156,11 @@ export default function Checkout() {
       <section className="min-h-[calc(100vh-4rem)] py-16 px-8 sm:px-12 lg:px-16 geometric-pattern hero-gradient">
         <div
           className="max-w-6xl mx-auto h-full"
-          style={{ background: "#f5f5f5f5", padding: "3rem", borderRadius: "0.25rem" }}
+          style={{
+            background: "#f5f5f5f5",
+            padding: "3rem",
+            borderRadius: "0.25rem",
+          }}
         >
           <div className="flex items-start justify-between gap-4 flex-col md:flex-row">
             <div className="w-full">
@@ -130,33 +171,25 @@ export default function Checkout() {
                 Checkout
               </h1>
               <p className="text-gray-600 mb-8">
-                Review your tickets and enter payment details to complete your purchase.
+                Review your tickets and enter payment details to complete your
+                purchase.
               </p>
             </div>
-
-            <button
-              onClick={() => navigate("/user/cart")}
-              className="relative w-full max-w-xs mx-auto py-3 rounded font-semibold transition"
-              style={{
-                background: "linear-gradient(135deg, #ff3366, #ff6699)",
-              }}
-            >
-              <span className="absolute inset-0 flex items-center justify-center text-black">
-                Back to Cart
-              </span>
-            </button>
           </div>
 
-          {/* Empty state */}
           {items.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">Your cart is empty</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                Your cart is empty
+              </h2>
               <p className="text-gray-600 mb-6">
                 Add tickets from an event before checking out.
               </p>
               <button
                 className="px-8 py-3 rounded text-white font-semibold"
-                style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+                style={{
+                  background: "linear-gradient(135deg, #ff3366, #ff6699)",
+                }}
                 onClick={() => navigate("/venues")}
               >
                 Browse Events
@@ -164,12 +197,13 @@ export default function Checkout() {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left: Payment form */}
+              {/* Payment form */}
               <div className="lg:col-span-2">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Payment Details</h2>
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    Payment Details
+                  </h2>
 
-                  {/* IMPORTANT: ensure inputs are visible */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -196,7 +230,9 @@ export default function Checkout() {
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2"
                         style={{ outlineColor: "#ff3366" }}
                       />
-                      <p className="mt-2 text-xs text-gray-500">Mock payment — any valid-looking number works.</p>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Mock payment — any valid-looking number works.
+                      </p>
                     </div>
 
                     <div>
@@ -250,7 +286,10 @@ export default function Checkout() {
                   <div className="mt-8 flex items-center justify-end gap-3">
                     <button
                       className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
-                      onClick={() => navigate("/user/cart")}
+                      style={{
+                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
+                      }}
+                      onClick={() => navigate("/")}
                       disabled={submitting}
                     >
                       Cancel
@@ -260,7 +299,9 @@ export default function Checkout() {
                       disabled={!canSubmit || submitting}
                       onClick={handlePay}
                       className="px-8 py-3 rounded text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
-                      style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+                      style={{
+                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
+                      }}
                     >
                       {submitting ? "Processing..." : `Pay ${formatMoney(total)}`}
                     </button>
@@ -268,16 +309,23 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Right: Order summary */}
+              {/* Order summary */}
               <div className="lg:col-span-1">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    Order Summary
+                  </h2>
 
                   <div className="space-y-4">
                     {items.map((i) => (
-                      <div key={i.seatSectionName} className="flex items-start justify-between gap-4">
+                      <div
+                        key={i.seatSectionName}
+                        className="flex items-start justify-between gap-4"
+                      >
                         <div>
-                          <p className="font-semibold text-gray-800">{i.seatSectionName}</p>
+                          <p className="font-semibold text-gray-800">
+                            {i.seatSectionName}
+                          </p>
                           <p className="text-sm text-gray-600">
                             Qty {i.quantity} × {formatMoney(i.price)}
                           </p>
@@ -294,28 +342,21 @@ export default function Checkout() {
                       <span>Subtotal</span>
                       <span className="font-medium">{formatMoney(subtotal)}</span>
                     </div>
-
                     <div className="flex justify-between text-gray-700">
                       <span>Service Fee</span>
                       <span className="font-medium">{formatMoney(serviceFee)}</span>
                     </div>
-
                     <div className="flex justify-between text-gray-900 text-lg font-bold mt-2">
                       <span>Total</span>
                       <span style={{ color: "#ff3366" }}>{formatMoney(total)}</span>
                     </div>
-
-                    {cart?.eventId ? (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Event ID: {cart.eventId}
-                      </p>
-                    ) : null}
                   </div>
                 </div>
 
                 <div className="mt-6 bg-white rounded-lg border border-gray-200 p-6">
                   <p className="text-sm text-gray-600">
-                    This is a <span className="font-semibold">mock</span> credit card payment for your project demo.
+                    This is a <span className="font-semibold">mock</span> credit card
+                    payment for your project demo.
                   </p>
                 </div>
               </div>

@@ -58,19 +58,22 @@ export default function Bookings() {
             <button
               onClick={() => navigate(-1)}
               className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+              style={{
+                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
+                      }}
             >
               Back
             </button>
           </div>
 
           <p className="text-gray-600 mb-6">
-            View your bookings. Optionally filter by Event ID.
+            View all bookings here or filter by Booking ID
           </p>
 
           {/* Filter */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 mb-8 flex flex-col md:flex-row gap-3 md:items-end">
+          <div className="bg-white rounded-lg border border-gray-200 text-black placeholder-gray-400 p-5 mb-8 flex flex-col md:flex-row gap-3 md:items-end">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Event ID (optional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Booking ID (optional)</label>
               <input
                 value={eventIdInput}
                 onChange={(e) => setEventIdInput(e.target.value)}
@@ -101,7 +104,8 @@ export default function Bookings() {
               </button>
 
               <button
-                className="px-6 py-2 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                className="px-6 py-2 rounded text-white font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                style={{ background: "linear-gradient(135deg, #e21f1f, #ff6699)" }}
                 onClick={() => {
                   setEventIdInput("");
                   params.delete("eventId");

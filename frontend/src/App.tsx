@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard"
 import Venues from "./pages/Venues/Venues";
-import Cart from "./user/Cart";
 import Checkout from "./user/Checkout";
 import CreateVenue from "./pages/Venues/CreateVenue";
 import EventDetails from "./pages/EventDetails";
@@ -35,7 +34,6 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/venues" element={<Venues />} />
         <Route path="/venues/create" element={<CreateVenue />} />
-        <Route path="/cart" element={<Cart />} />
         <Route path="/host-requests" element={<HostRequests />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/checkout" element={<Checkout />} />

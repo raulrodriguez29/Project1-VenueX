@@ -54,10 +54,8 @@ const ActionButton = ({
 )
 
 export const UserActions = ({
-  cartCount = 0,
   inboxCount = 0,
   hostRequestCount = 0,
-  onCartClick,
   onInboxClick,
   onProfileClick,
   onHostRequestClick
@@ -70,10 +68,15 @@ export const UserActions = ({
       {isLoggedIn ? (
         <>
           {/* Show Icons only when logged in */}
-          <ActionButton onClick={onCartClick} ariaLabel="Shopping cart">
-            <CartIcon />
-            {cartCount > 0 && <Badge count={cartCount} />}
-          </ActionButton>
+          <button onClick={() => navigate("/bookings")}
+            className="px-4 py-2 rounded font-semibold transition"
+            style={{
+            background: "linear-gradient(135deg, #ff3366, #ff6699)",
+            color: "white",
+          }}
+          >
+            Get Bookings
+          </button>
 
           <RoleGate allow={["ADMIN"]}>
             <ActionButton onClick={onHostRequestClick} ariaLabel="Host requests">
