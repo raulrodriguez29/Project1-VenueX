@@ -84,6 +84,9 @@ export default function Ticket() {
         return;
       }
 
+      sessionStorage.removeItem(STORAGE_KEY(parsedEventId)); //REMOVE IN CASE OF CRASH
+      setQtyBySection({ VIP: 0, Premium: 0, Floor: 0, General: 0 }); //REMOVE IN CASE OF CRASH
+
       try {
         setLoading(true);
 
@@ -114,11 +117,11 @@ export default function Ticket() {
           }
         }
       } catch (e: any) {
-    console.error(e);
-    const status = e?.response?.status;
-    setError(status ? `Failed to load seat sections (HTTP ${status})` : "Failed to load seat sections for this event.");
-  }
-  finally {
+        console.error(e);
+        const status = e?.response?.status;
+        setError(status ? `Failed to load seat sections (HTTP ${status})` : "Failed to load seat sections for this event.");
+      }
+      finally {
         setLoading(false);
       }
     };
@@ -159,11 +162,11 @@ export default function Ticket() {
 
   const hasErrors = Object.values(validation).some((v) => v !== undefined);
   const canAddToCart =
-  !loading &&
-  !error &&
-  rows.length > 0 &&
-  !hasErrors &&
-  totalTickets > 0;
+    !loading &&
+    !error &&
+    rows.length > 0 &&
+    !hasErrors &&
+    totalTickets > 0;
 
   const onQtyChange = (section: SeatSectionKey, nextValue: string) => {
     const num = nextValue.trim() === "" ? 0 : Number(nextValue);
@@ -174,55 +177,55 @@ export default function Ticket() {
     }));
   };
 
-  const handleAddToCart = async() => {
-  setError(null);
-  if (!canAddToCart) return;
+  const handleAddToCart = async () => {
+    setError(null);
+    if (!canAddToCart) return;
 
-  const selections: SelectionItem[] = rows
-    .map((r) => ({
-      seatSectionName: r.seatSectionName,
-      quantity: qtyBySection[r.seatSectionName] ?? 0,
-      price: r.price,
-    }))
-    .filter((x) => x.quantity > 0);
+    const selections: SelectionItem[] = rows
+      .map((r) => ({
+        seatSectionName: r.seatSectionName,
+        quantity: qtyBySection[r.seatSectionName] ?? 0,
+        price: r.price,
+      }))
+      .filter((x) => x.quantity > 0);
 
-  try {
-    if (!bookingId) {
-      setError("Missing booking information. Please restart checkout.");
-      return;
+    try {
+      if (!bookingId) {
+        setError("Missing booking information. Please restart checkout.");
+        return;
+      }
+
+      const tickets = selections.map((sel) => ({
+        seatSectionName: sel.seatSectionName,
+        quantity: sel.quantity,
+      }));
+
+      await addTicketsToBooking(bookingId, tickets);
+      console.log('Tickets added to booking:', tickets);
+
+      // Save to sessionStorage so Checkout can read it
+      const stored: StoredTicketSelection = {
+        eventId: parsedEventId,
+        selections,
+        total: totalPrice,
+        savedAt: new Date().toISOString(),
+      };
+      sessionStorage.setItem(STORAGE_KEY(parsedEventId), JSON.stringify(stored));
+
+      // Navigate to Checkout
+      navigate("/user/checkout", {
+        state: {
+          eventId: parsedEventId,
+          bookingId,
+          selections,
+        }
+      });
+
+    } catch (error) {
+      console.error('Failed to add tickets:', error);
+      setError("Failed to add tickets to booking. Please try again.");
     }
-
-    const tickets = selections.map((sel) => ({
-      seatSectionName: sel.seatSectionName,
-      quantity: sel.quantity,
-    }));
-
-    await addTicketsToBooking(bookingId, tickets);
-    console.log('Tickets added to booking:', tickets);
-
-    // Save to sessionStorage so Checkout can read it
-    const stored: StoredTicketSelection = {
-      eventId: parsedEventId,
-      selections,
-      total: totalPrice,
-      savedAt: new Date().toISOString(),
-    };
-    sessionStorage.setItem(STORAGE_KEY(parsedEventId), JSON.stringify(stored));
-
-    // Navigate to Checkout
-    navigate("/user/checkout", { 
-      state: { 
-        eventId: parsedEventId, 
-        bookingId,
-        selections, 
-      } 
-    });
-
-  } catch (error) {
-    console.error('Failed to add tickets:', error);
-    setError("Failed to add tickets to booking. Please try again.");
-  }
-};
+  };
 
 
 

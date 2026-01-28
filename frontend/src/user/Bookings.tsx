@@ -59,8 +59,8 @@ export default function Bookings() {
               onClick={() => navigate(-1)}
               className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
               style={{
-                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
-                      }}
+                background: "linear-gradient(135deg, #ff3366, #ff6699)",
+              }}
             >
               Back
             </button>
@@ -77,7 +77,7 @@ export default function Bookings() {
               <input
                 value={eventIdInput}
                 onChange={(e) => setEventIdInput(e.target.value)}
-                placeholder="e.g. 2"
+                placeholder="e.g. 1"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2"
                 style={{ outlineColor: "#ff3366" }}
                 inputMode="numeric"
