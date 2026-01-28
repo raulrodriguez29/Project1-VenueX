@@ -13,6 +13,8 @@ export default function HostRequestCard({hostRequest}: Props) {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  type Status = 'PENDING' | 'APPROVED' | 'DENIED';
+  const [styleStatus, setStyleStatus] = useState<Status>('PENDING');
 
   useEffect(() => {
     getUserById(hostRequest.userId)
@@ -44,6 +46,7 @@ const handleApprove = async () => {
     await approveHostRequest(hostRequest.id, {
       status: "APPROVED",
     });
+    setStyleStatus("APPROVED");
   } catch (err) {
     console.error("Failed to approve host request", err);
   }
@@ -54,6 +57,7 @@ const handleDeny = async () => {
     await denyHostRequest(hostRequest.id, {
       status: "DENIED",
     });
+    setStyleStatus("DENIED");
   } catch (err) {
     console.error("Failed to deny host request", err);
   }
@@ -62,13 +66,23 @@ const handleDeny = async () => {
     return(
         <div
   className="notification-card notification-unread card-hover rounded-xl p-6 shadow-sm"
-  style={{ backgroundColor: "#f5f5f5" }}
+  style={{ 
+    backgroundColor:
+      styleStatus === 'PENDING'
+        ? "#f5f5f5" 
+        : "#c9c9c9"}}
   data-hostRequest-id={hostRequest.id}
 >
   <div className="flex items-start gap-4">
     <div
       className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-      style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+      style={{ 
+        background: 
+          styleStatus === 'APPROVED'
+          ? 'linear-gradient(135deg, #10b981, #059669)'
+          : styleStatus === 'DENIED'
+          ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+          :"linear-gradient(135deg, #ff3366, #ff6699)" }}
     >
       <ProfileIcon />
     </div>
@@ -76,7 +90,11 @@ const handleDeny = async () => {
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
           <h3 className="font-semibold text-gray-900 text-lg">
-            New Host Request
+            {styleStatus === 'APPROVED'
+              ? 'Request Approved'
+              : styleStatus === 'DENIED'
+              ? 'Request Denied'
+              : 'New Host Request'}
           </h3>
           <p className="text-sm text-gray-500">USERID: {hostRequest.userId}</p>
         </div>
@@ -108,56 +126,62 @@ const handleDeny = async () => {
         className="text-gray-700 leading-relaxed mb-4"
         id="notification-1-body"
       >
-        {user?.firstName} {user?.lastName} has requested to become a Host.
+        {styleStatus === 'PENDING'
+          ? `${user?.firstName} ${user?.lastName} has requested to become a Host.`
+          : styleStatus === 'APPROVED'
+          ? `${user?.firstName} ${user?.lastName}'s Host Request has been approved.`
+          : `${user?.firstName} ${user?.lastName}'s Host Request has been denied.`}
       </p>
-      <div className="flex gap-3">
-        <button
-          onClick={handleApprove}
-          className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
-          style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
-        >
-          {" "}
-          <span className="flex items-center justify-center gap-2">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>{" "}
-            Approve{""}
-          </span>{" "}
-        </button>{" "}
-        <button
-          onClick={handleDeny}
-          className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
-          style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
-        >
-          {" "}
-          <span className="flex items-center justify-center gap-2">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>{" "}
-            Deny{" "}
-          </span>{" "}
-        </button>
-      </div>
+      {styleStatus === 'PENDING' && (
+        <div className="flex gap-3">
+          <button
+            onClick={handleApprove}
+            className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
+            style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+          >
+            {" "}
+            <span className="flex items-center justify-center gap-2">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>{" "}
+              Approve{""}
+            </span>{" "}
+          </button>{" "}
+          <button
+            onClick={handleDeny}
+            className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white transition-all hover:shadow-lg"
+            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+          >
+            {" "}
+            <span className="flex items-center justify-center gap-2">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>{" "}
+              Deny{" "}
+            </span>{" "}
+          </button>
+        </div>
+      )}
     </div>
   </div>
 </div>
