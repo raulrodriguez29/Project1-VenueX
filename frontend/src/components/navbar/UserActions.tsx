@@ -69,7 +69,7 @@ export const UserActions = ({
         <>
           {/* Show Icons only when logged in */}
           <button onClick={() => navigate("/bookings")}
-            className="px-4 py-2 rounded font-semibold transition"
+            className="px-4 py-2 rounded-full font-semibold transition"
             style={{
             background: "linear-gradient(135deg, #ff3366, #ff6699)",
             color: "white",

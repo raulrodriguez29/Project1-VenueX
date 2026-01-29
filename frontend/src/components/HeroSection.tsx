@@ -30,15 +30,15 @@ export default function HeroSection() {
           <h1
             className="font-display text-6xl md:text-8xl tracking-wide leading-none"
             id="featured-artist"
-            style={{ color: "#ff3366" }}
+            style={{ color: "#7a35b3" }}
           >
-            AURORA
+            Olivia Rodrigo
           </h1>
           <h2
             className="font-display text-3xl md:text-4xl tracking-wider text-white/80"
             id="featured-tour"
           >
-            WHAT HAPPENED TO THE HEART TOUR
+            GUTS WORLD TOUR: <span style={{color: "#ff3366"}}>SPILLED</span>
           </h2>
           <div className="flex flex-wrap gap-6 text-gray-400 justify-center">
             <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export default function HeroSection() {
               >
                 
               </svg>
-              <span id="featured-date">March 15, 2025 • 8:00 PM</span>
+              <span id="featured-date">May 30, 2026 • 8:00 PM</span>
             </div>
             <div className="flex items-center gap-2">
               <svg
@@ -74,7 +74,7 @@ export default function HeroSection() {
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span id="featured-venue">Madison Square Garden, NYC</span>
+              <span id="featured-venue">AT&T Stadium, Arlington, TX</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-4 pt-4 justify-center">

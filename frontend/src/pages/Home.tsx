@@ -7,11 +7,21 @@ import { useAuth } from "../auth/AuthContext"
 
 export default function Home() {
   const { isLoggedIn, user} = useAuth()
+
+  const scrollToTarget = () => {
+    document
+    .getElementById('trending-events')
+    ?.scrollIntoView({ behavior: 'smooth'
+    });
+  };
+
   return (
     <>
-      <Navbar />
+      <Navbar onScrollToTarget={scrollToTarget} />
       <HeroSection />
-      <TrendingEvents />
+      <div id='trending-events'>
+        <TrendingEvents />
+      </div>
       {(!isLoggedIn || user?.role === "USER") && <OrganizerPromo />}
       <Footer />
     </>

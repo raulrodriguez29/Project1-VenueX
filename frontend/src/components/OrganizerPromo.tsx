@@ -35,7 +35,7 @@ export default function OrganizerPromo() {
         >
           Partner with VenueX and reach millions of passionate music fans. Our
           platform offers powerful tools for ticketing, marketing, and
-          analytics.
+          branding.
         </p>
         <div className="flex flex-wrap gap-4 pt-4 justify-center">
           <Link to="/contact-form">

@@ -144,7 +144,7 @@ export default function Bookings() {
               <button
                 className="mt-5 px-6 py-2 rounded text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
-                onClick={() => navigate("/venues")}
+                onClick={() => navigate("/")}
               >
                 Browse Events
               </button>
