@@ -85,7 +85,7 @@ export default function Checkout() {
   );
 
   const serviceFee = useMemo(
-    () => (subtotal > 0 ? Math.max(2.5, subtotal * 0.08) : 0),
+    () => (subtotal > 0 ? Math.max(2.5, subtotal * 0.0825) : 0),
     [subtotal]
   );
 
