@@ -142,7 +142,7 @@ export default function Checkout() {
       setSubmitting(true);
       const status = await submitPayment(bookingId);
       console.log(status);
-      navigate("/");
+      navigate("/payment-confirmation");
     } catch (e) {
       console.error(e);
       setError("Payment failed. Please try again.");
@@ -186,7 +186,7 @@ export default function Checkout() {
                 Add tickets from an event before checking out.
               </p>
               <button
-                className="px-8 py-3 rounded text-white font-semibold"
+                className="px-8 py-3 rounded-full text-white font-semibold"
                 style={{
                   background: "linear-gradient(135deg, #ff3366, #ff6699)",
                 }}
@@ -285,9 +285,9 @@ export default function Checkout() {
 
                   <div className="mt-8 flex items-center justify-end gap-3">
                     <button
-                      className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                      className="px-6 py-3 rounded-full font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
                       style={{
-                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
+                        background: "linear-gradient(135deg, #685d5f, #97858c)",
                       }}
                       onClick={() => navigate("/")}
                       disabled={submitting}
@@ -298,7 +298,7 @@ export default function Checkout() {
                     <button
                       disabled={!canSubmit || submitting}
                       onClick={handlePay}
-                      className="px-8 py-3 rounded text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="px-8 py-3 rounded-full text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
                       style={{
                         background: "linear-gradient(135deg, #ff3366, #ff6699)",
                       }}

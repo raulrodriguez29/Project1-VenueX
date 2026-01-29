@@ -75,7 +75,7 @@ export default function VenueCard({venue}: VenueCardProps) {
             <div className="flex justify-end gap-4">
               <button
                 className="px-4 py-2 justify-end rounded-full text-sm font-medium text-white transition-all hover:scale-105"
-                style={{background: "linear-gradient(135deg, #a87878, #797979)"}}
+                style={{background: "linear-gradient(135deg, #494343, #797979)"}}
                 onClick={(e) => {
                   e.stopPropagation()
                     navigate(`/venues/${venue.id}`)

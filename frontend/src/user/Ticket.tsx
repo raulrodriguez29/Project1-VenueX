@@ -253,7 +253,7 @@ export default function Ticket() {
             <div className="rounded-lg border border-red-200 bg-white p-4">
               <p className="text-red-600 font-medium">{error}</p>
               <button
-                className="mt-4 px-6 py-2 rounded text-white font-semibold"
+                className="mt-4 px-6 py-2 rounded-full text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                 onClick={() => navigate(-1)}
               >
@@ -327,8 +327,8 @@ export default function Ticket() {
 
                 <div className="flex gap-3">
                   <button
-                    className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
-                    style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
+                    className="px-6 py-3 rounded-full font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                    style={{ background: "linear-gradient(135deg, #685d5f, #97858c)" }}
                     onClick={() => navigate(-1)}
                   >
                     Back
@@ -337,7 +337,7 @@ export default function Ticket() {
                   <button
                     disabled={!canAddToCart}
                     onClick={handleAddToCart}
-                    className="px-8 py-3 rounded text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="px-8 py-3 rounded-full text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                   >
                     Proceed to Checkout

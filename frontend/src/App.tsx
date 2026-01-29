@@ -21,6 +21,7 @@ import HostRequests from "./pages/HostRequests";
 import UserRoutes from "./user/UserRoutes";
 import Bookings from "./user/Bookings";
 import Ticket from "./user/Ticket";
+import Confirmation from "./pages/Confirmation"
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/host-requests" element={<HostRequests />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/payment-confirmation" element={<Confirmation/>} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/venues/:id" element={<VenueDetails />} />
         <Route path="/profile/:id" element={<Profile />} />

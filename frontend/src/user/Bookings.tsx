@@ -64,7 +64,7 @@ export default function Bookings() {
 
             <button
               onClick={() => navigate(-1)}
-              className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white text-black hover:bg-gray-50 transition"
+              className="px-6 py-3 rounded-full font-semibold border border-gray-300 bg-white text-black hover:bg-gray-50 transition"
             >
               Back
             </button>
@@ -90,7 +90,7 @@ export default function Bookings() {
 
             <div className="flex gap-3">
               <button
-                className="px-6 py-2 rounded text-white font-semibold"
+                className="px-6 py-2 rounded-full text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                 onClick={() => {
                   const n = Number(bookingIdInput);
@@ -112,7 +112,7 @@ export default function Bookings() {
               </button>
 
               <button
-                className="px-6 py-2 rounded text-black font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                className="px-6 py-2 rounded-full text-black font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
                 onClick={() => {
                   setBookingIdInput("");
                   params.delete("bookingId");
@@ -142,7 +142,7 @@ export default function Bookings() {
                 {bookingIdParam ? "Try a different Booking ID or clear the filter" : "Book an event to see it show up here."}
               </p>
               <button
-                className="mt-5 px-6 py-2 rounded text-white font-semibold"
+                className="mt-5 px-6 py-2 rounded-full text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                 onClick={() => navigate("/")}
               >

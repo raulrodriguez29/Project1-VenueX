@@ -58,7 +58,7 @@ const ContactForm = () => {
     <Blank>
         <h2
         className="font-display text-4xl md:text-5xl tracking-wide"
-        style={{ color: "#720a24" }}
+        style={{ color: "#ff3366" }}
         >
             CONTACT US
         </h2>
