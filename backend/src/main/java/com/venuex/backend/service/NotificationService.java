@@ -65,7 +65,7 @@ public class NotificationService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
 
         if (!userEmail.equals(existingNotification.getUser().getEmail())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to delete");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authorized to delete");
         }
         notificationRepository.delete(existingNotification);
     }

@@ -53,7 +53,7 @@ public class TicketService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
         if (!booking.getUser().getEmail().equals(userEmail)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized user");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized user");
         }
         return ticketRepository.findByBookingId(bookingId)
             .stream()
