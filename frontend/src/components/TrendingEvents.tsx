@@ -4,6 +4,7 @@ import { getAllEvents, getMyEvents } from "../api/events.api"
 import type{ Event } from "../types/Events"
 import RoleGate from "../auth/RoleGate"
 import { useNavigate } from "react-router-dom"
+import HostRequestButton from "../components/HostRequestButton"
 
 export default function TrendingEvents() {
   const [events, setEvents] = useState<Event[]>([])
@@ -26,20 +27,13 @@ export default function TrendingEvents() {
     <section className="py-16">
       <div className="max-w-6xl mx-auto px-16">
         {/* TRENDING HEADER */}
-        <div className="mb-10 flex items-center">
+        <div className="mb-10 flex items-center justify-between">
           <h2 className="text-4xl font-extrabold text-white tracking-tight">
             {showMyEvents ? "My Events" : "Events"}
           </h2>
           
           <RoleGate allow={["USER"]}>
-            <button
-              className="ml-auto px-5 py-2 rounded-full text-md font-semibold text-white transition-all hover:scale-105"
-              style={{
-                background: "linear-gradient(135deg, #ff3366, #ff6699)",
-              }}
-            >
-              Request to host an event
-            </button>
+            <HostRequestButton />
           </RoleGate>
           
           {/* ONLY for host and admin */}
