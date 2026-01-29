@@ -2,6 +2,7 @@ import RoleGate from "../auth/RoleGate"
 import type { Event } from "../types/Events"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/AuthContext"
+import { createBooking } from "../api/bookings.api"
 
 interface EventCardProps {
   event: Event
@@ -9,40 +10,38 @@ interface EventCardProps {
 
 export default function EventCard({ event }: EventCardProps) {
   const navigate = useNavigate()
+  const { isLoggedIn } = useAuth()
 
   const formattedDate = new Date(event.startTime).toLocaleString("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   })
 
-  const { isLoggedIn } = useAuth()
-
   const imageUrl = `https://picsum.photos/seed/${event.id}/400/300`;
+
   return (
     <div
       onClick={() => navigate(`/events/${event.id}`)}
       className="card-hover group rounded-2xl overflow-hidden cursor-pointer"
       style={{ background: "#1a1a1a", border: "1px solid #333" }}
     >
-    {/* IMAGE / VISUAL SECTION */}
-    <div className="aspect-[4/3] relative overflow-hidden rounded-t-2xl">
-      {/* Random image for the event */}
-      <img
-        src={imageUrl}
-        onError={(e) => {
-          e.currentTarget.src = `https://picsum.photos/400/300?random=${event.id}`
-        }}
-        alt={event.name}
-        className="w-full h-full object-cover"
-      />
-      {/* Dark gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-    <div
+      {/* IMAGE / VISUAL SECTION */}
+      <div className="aspect-[4/3] relative overflow-hidden rounded-t-2xl">
+        <img
+          src={imageUrl}
+          onError={(e) => {
+            e.currentTarget.src = `https://picsum.photos/400/300?random=${event.id}`
+          }}
+          alt={event.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <div
           className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium text-white"
           style={
             event.status === "OPEN"
-            ? { background: "rgba(34,197,94,0.9)" }   // green
-            : { background: "rgba(255,51,102,0.9)" } // pink/red
+              ? { background: "rgba(34,197,94,0.9)" }
+              : { background: "rgba(255,51,102,0.9)" }
           }>
           {event.status}
         </div>
@@ -65,30 +64,40 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-        {/* EDIT EVENT (LEFT) HOST stuff only*/}
-        <RoleGate allow={["HOST", "ADMIN"]}>
-          <button
-            className="px-4 py-2 rounded-full text-sm font-medium text-gray-300 border border-gray-600 hover:text-white hover:border-pink-400 transition-all"
-            onClick={(e) => {
-              e.stopPropagation()
-              navigate(`/events/${event.id}/edit`)
-            }}>
-            Edit Event
-          </button>
-        </RoleGate>
-          {/* GET TICKETS (RIGHT) */}
+          {/* EDIT EVENT (LEFT) HOST stuff only*/}
+          <RoleGate allow={["HOST", "ADMIN"]}>
+            <button
+              className="px-4 py-2 rounded-full text-sm font-medium text-gray-300 border border-gray-600 hover:text-white hover:border-pink-400 transition-all"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/events/${event.id}/edit`)
+              }}>
+              Edit Event
+            </button>
+          </RoleGate>
+          
+          {/* GET TICKETS (RIGHT) - UPDATED WITH BOOKING API */}
           <button
             className="ml-auto px-4 py-2 rounded-full text-sm font-medium text-white transition-all hover:scale-105"
             style={{
               background: "linear-gradient(135deg, #ff3366, #ff6699)",
             }}
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation()
               if (!isLoggedIn) {
                 navigate("/register")
                 return
               }
-              navigate(`/events/${event.id}`)
+              
+              try {
+                const bookingId = await createBooking(event.id)
+                console.log('Booking created:', bookingId)
+                navigate(`/events/${event.id}/tickets`, { 
+                  state: { bookingId } 
+                })
+              } catch (error) {
+                console.error('Booking failed:', error)
+              }
             }}>
             Get Tickets
           </button>

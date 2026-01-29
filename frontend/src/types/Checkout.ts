@@ -20,6 +20,5 @@ export interface PaymentRequest {
 }
 
 export interface PaymentResponse {
-  paymentId: number;
   status: "PAID" | "UNPAID";
 }

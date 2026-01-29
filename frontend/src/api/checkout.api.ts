@@ -1,5 +1,6 @@
-import api from "axios";
-import { CheckoutSummary, PaymentRequest, PaymentResponse } from "../types/Checkout";
+
+import api from "./axios.config";
+import type { CheckoutSummary, PaymentResponse } from "../types/Checkout";
 
 // Fetch checkout/cart summary for a booking 
 export const getCheckoutSummary = async (
@@ -12,10 +13,9 @@ export const getCheckoutSummary = async (
 };
 
 // Submit checkout payment
-export const submitPayment = async (bookingId: number) => {
-  const { data } = await api.post("/payments", {
+export const submitPayment = async (bookingId: number): Promise<PaymentResponse> => {
+  const { data } = await api.post(`/user/bookings/${bookingId}/payment`, {
     bookingId,
-    paymentMethod: "CREDIT_CARD"
   });
 
   return data;

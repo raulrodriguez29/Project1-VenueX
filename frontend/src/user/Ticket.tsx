@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getEventSeatSections } from "../api/eventSeatSections.api";
 import type { EventSeatSectionDTO } from "../api/eventSeatSections.api";
-
+import { addTicketsToBooking } from "../api/tickets.api";
 type SeatSectionKey = "VIP" | "Premium" | "Floor" | "General";
 
 interface SeatSectionRow {
@@ -24,8 +24,10 @@ interface StoredTicketSelection {
   savedAt: string;
 }
 
+type TicketLocationState = {
+  bookingId: number;
+};
 const STORAGE_KEY = (eventId: number) => `venuex_ticket_selection_event_${eventId}`;
-
 // Normalize backend DTO into what the UI needs (based on your backend DTO shape)
 function normalizeSeatSections(raw: EventSeatSectionDTO[]): SeatSectionRow[] {
   const allowed: SeatSectionKey[] = ["VIP", "Premium", "Floor", "General"];
@@ -56,6 +58,8 @@ export default function Ticket() {
   const navigate = useNavigate();
   const { eventId } = useParams();
 
+  const location = useLocation() as { state?: TicketLocationState };
+  const bookingId = location.state?.bookingId;
   const parsedEventId = Number(eventId);
 
   const [rows, setRows] = useState<SeatSectionRow[]>([]);
@@ -153,12 +157,13 @@ export default function Ticket() {
     }, 0);
   }, [rows, qtyBySection]);
 
+  const hasErrors = Object.values(validation).some((v) => v !== undefined);
   const canAddToCart =
-    !loading &&
-    !error &&
-    rows.length > 0 &&
-    Object.keys(validation).length === 0 &&
-    totalTickets > 0;
+  !loading &&
+  !error &&
+  rows.length > 0 &&
+  !hasErrors &&
+  totalTickets > 0;
 
   const onQtyChange = (section: SeatSectionKey, nextValue: string) => {
     const num = nextValue.trim() === "" ? 0 : Number(nextValue);
@@ -169,28 +174,57 @@ export default function Ticket() {
     }));
   };
 
-  const handleAddToCart = () => {
-    if (!canAddToCart) return;
+  const handleAddToCart = async() => {
+  setError(null);
+  if (!canAddToCart) return;
 
-    const selections: SelectionItem[] = rows
-      .map((r) => ({
-        seatSectionName: r.seatSectionName,
-        quantity: qtyBySection[r.seatSectionName] ?? 0,
-        price: r.price,
-      }))
-      .filter((x) => x.quantity > 0);
+  const selections: SelectionItem[] = rows
+    .map((r) => ({
+      seatSectionName: r.seatSectionName,
+      quantity: qtyBySection[r.seatSectionName] ?? 0,
+      price: r.price,
+    }))
+    .filter((x) => x.quantity > 0);
 
-    const payload: StoredTicketSelection = {
+  try {
+    if (!bookingId) {
+      setError("Missing booking information. Please restart checkout.");
+      return;
+    }
+
+    const tickets = selections.map((sel) => ({
+      seatSectionName: sel.seatSectionName,
+      quantity: sel.quantity,
+    }));
+
+    await addTicketsToBooking(bookingId, tickets);
+    console.log('Tickets added to booking:', tickets);
+
+    // Save to sessionStorage so Checkout can read it
+    const stored: StoredTicketSelection = {
       eventId: parsedEventId,
       selections,
-      total: Number(totalPrice.toFixed(2)),
+      total: totalPrice,
       savedAt: new Date().toISOString(),
     };
+    sessionStorage.setItem(STORAGE_KEY(parsedEventId), JSON.stringify(stored));
 
-    sessionStorage.setItem(STORAGE_KEY(parsedEventId), JSON.stringify(payload));
+    // Navigate to Checkout
+    navigate("/user/checkout", { 
+      state: { 
+        eventId: parsedEventId, 
+        bookingId,
+        selections, 
+      } 
+    });
 
-    navigate("/user/cart");
-  };
+  } catch (error) {
+    console.error('Failed to add tickets:', error);
+    setError("Failed to add tickets to booking. Please try again.");
+  }
+};
+
+
 
   return (
     <main className="pt-16 flex-1">
@@ -259,7 +293,7 @@ export default function Ticket() {
                                 step={1}
                                 value={qty}
                                 onChange={(e) => onQtyChange(r.seatSectionName, e.target.value)}
-                                className="w-28 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2"
+                                className="w-28 rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2"
                                 style={{ outlineColor: "#ff3366" }}
                               />
                               {rowError && <p className="mt-2 text-sm text-red-600">{rowError}</p>}
@@ -278,7 +312,7 @@ export default function Ticket() {
                     Tickets Selected: <span className="font-semibold">{totalTickets}</span>
                   </p>
                   <p className="text-gray-700 mt-2">
-                    Total:{" "}
+                    Subtotal: {" "}
                     <span className="font-bold" style={{ color: "#ff3366" }}>
                       ${totalPrice.toFixed(2)}
                     </span>
@@ -291,6 +325,7 @@ export default function Ticket() {
                 <div className="flex gap-3">
                   <button
                     className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
+                    style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                     onClick={() => navigate(-1)}
                   >
                     Back
@@ -302,7 +337,7 @@ export default function Ticket() {
                     className="px-8 py-3 rounded text-white font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                   >
-                    Add to Cart
+                    Proceed to Checkout
                   </button>
                 </div>
               </div>
