@@ -40,7 +40,7 @@ function getLatestStoredSelection(): StoredTicketSelection | null {
       if (
         !latest ||
         new Date(parsed.savedAt).getTime() >
-          new Date(latest.savedAt).getTime()
+        new Date(latest.savedAt).getTime()
       ) {
         latest = parsed;
       }
@@ -85,7 +85,7 @@ export default function Checkout() {
   );
 
   const serviceFee = useMemo(
-    () => (subtotal > 0 ? Math.max(2.5, subtotal * 0.08) : 0),
+    () => (subtotal > 0 ? Math.max(2.5, subtotal * 0.0825) : 0),
     [subtotal]
   );
 
@@ -212,7 +212,7 @@ export default function Checkout() {
                       <input
                         value={nameOnCard}
                         onChange={(e) => setNameOnCard(e.target.value)}
-                        placeholder="Jane Doe"
+                        placeholder="John Doe"
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2"
                         style={{ outlineColor: "#ff3366" }}
                       />
@@ -270,7 +270,7 @@ export default function Checkout() {
                         value={zip}
                         onChange={(e) => setZip(e.target.value)}
                         inputMode="numeric"
-                        placeholder="75001"
+                        placeholder="75000"
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2"
                         style={{ outlineColor: "#ff3366" }}
                       />
@@ -356,7 +356,7 @@ export default function Checkout() {
                 <div className="mt-6 bg-white rounded-lg border border-gray-200 p-6">
                   <p className="text-sm text-gray-600">
                     This is a <span className="font-semibold">mock</span> credit card
-                    payment for your project demo.
+                    payment for our Project 1 demo.
                   </p>
                 </div>
               </div>

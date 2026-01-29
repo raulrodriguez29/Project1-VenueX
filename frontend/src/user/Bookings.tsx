@@ -6,23 +6,24 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
 
-  const eventIdParam = params.get("eventId");
-  const parsedEventId = eventIdParam ? Number(eventIdParam) : undefined;
+  // Use bookingId in the URL (not eventId)
+  const bookingIdParam = params.get("bookingId");
+  const parsedBookingId = bookingIdParam ? Number(bookingIdParam) : undefined;
 
   const [bookings, setBookings] = useState<BookingReturnDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [eventIdInput, setEventIdInput] = useState<string>(eventIdParam ?? "");
+  // Input box state mirrors URL param
+  const [bookingIdInput, setBookingIdInput] = useState<string>(bookingIdParam ?? "");
 
   useEffect(() => {
     const load = async () => {
       setError(null);
       setLoading(true);
       try {
-        const data = await getUserBookings(
-          Number.isFinite(parsedEventId) && (parsedEventId as number) > 0 ? parsedEventId : undefined
-        );
+        // IMPORTANT: backend returns ALL bookings; filter happens client-side
+        const data = await getUserBookings();
         setBookings(data);
       } catch (e: any) {
         const status = e?.response?.status;
@@ -34,14 +35,20 @@ export default function Bookings() {
     };
 
     load();
-  }, [eventIdParam]);
+  }, []);
+
+  // Apply bookingId filter client-side
+  const filtered = useMemo(() => {
+    if (!Number.isFinite(parsedBookingId) || (parsedBookingId as number) <= 0) return bookings;
+    return bookings.filter((b) => b.id === parsedBookingId);
+  }, [bookings, parsedBookingId]);
 
   const formatted = useMemo(() => {
-    return bookings.map((b) => ({
+    return filtered.map((b) => ({
       ...b,
       bookedAtPretty: b.bookedAt ? new Date(b.bookedAt).toLocaleString() : "—",
     }));
-  }, [bookings]);
+  }, [filtered]);
 
   return (
     <main className="pt-16 flex-1">
@@ -57,28 +64,25 @@ export default function Bookings() {
 
             <button
               onClick={() => navigate(-1)}
-              className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
-              style={{
-                        background: "linear-gradient(135deg, #ff3366, #ff6699)",
-                      }}
+              className="px-6 py-3 rounded font-semibold border border-gray-300 bg-white text-black hover:bg-gray-50 transition"
             >
               Back
             </button>
           </div>
 
-          <p className="text-gray-600 mb-6">
-            View all bookings here or filter by Booking ID
-          </p>
+          <p className="text-gray-600 mb-6">View all bookings here or filter by Booking ID</p>
 
           {/* Filter */}
           <div className="bg-white rounded-lg border border-gray-200 text-black placeholder-gray-400 p-5 mb-8 flex flex-col md:flex-row gap-3 md:items-end">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Booking ID (optional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Booking ID (optional)
+              </label>
               <input
-                value={eventIdInput}
-                onChange={(e) => setEventIdInput(e.target.value)}
-                placeholder="e.g. 2"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2"
+                value={bookingIdInput}
+                onChange={(e) => setBookingIdInput(e.target.value)}
+                placeholder="e.g. 1"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 text-black"
                 style={{ outlineColor: "#ff3366" }}
                 inputMode="numeric"
               />
@@ -89,14 +93,18 @@ export default function Bookings() {
                 className="px-6 py-2 rounded text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
                 onClick={() => {
-                  const n = Number(eventIdInput);
-                  if (!eventIdInput.trim()) {
-                    params.delete("eventId");
+                  const n = Number(bookingIdInput);
+
+                  // empty input -> remove filter
+                  if (!bookingIdInput.trim()) {
+                    params.delete("bookingId");
                     setParams(params, { replace: true });
                     return;
                   }
+
+                  // valid bookingId -> set filter
                   if (Number.isFinite(n) && n > 0) {
-                    setParams({ eventId: String(n) }, { replace: true });
+                    setParams({ bookingId: String(n) }, { replace: true });
                   }
                 }}
               >
@@ -104,11 +112,10 @@ export default function Bookings() {
               </button>
 
               <button
-                className="px-6 py-2 rounded text-white font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
-                style={{ background: "linear-gradient(135deg, #e21f1f, #ff6699)" }}
+                className="px-6 py-2 rounded text-black font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
                 onClick={() => {
-                  setEventIdInput("");
-                  params.delete("eventId");
+                  setBookingIdInput("");
+                  params.delete("bookingId");
                   setParams(params, { replace: true });
                 }}
               >
@@ -128,8 +135,12 @@ export default function Bookings() {
 
           {!loading && !error && formatted.length === 0 && (
             <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-              <p className="text-gray-700 font-medium">No bookings found.</p>
-              <p className="text-gray-500 mt-2">Book an event to see it show up here.</p>
+              <p className="text-gray-700 font-medium">
+                {bookingIdParam ? "No booking found with that Booking ID." : "No bookings found."}
+              </p>
+              <p className="text-gray-500 mt-2">
+                {bookingIdParam ? "Try a different Booking ID or clear the filter" : "Book an event to see it show up here."}
+              </p>
               <button
                 className="mt-5 px-6 py-2 rounded text-white font-semibold"
                 style={{ background: "linear-gradient(135deg, #ff3366, #ff6699)" }}
