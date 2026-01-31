@@ -1,6 +1,6 @@
 import Navbar from "../../components/navbar/Navbar";
 import Blank from "../../components/Blank";
-import VenueCard from "../../components/VenueCard";
+import VenueCard from "../../components/VenueCard/VenueCard";
 import Footer from "../../components/Footer";
 
 import { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ const Venues = () => {
           <div className="flex justify-between">
             <h2
             className="font-display text-4xl md:text-5xl tracking-wide"
-            style={{ color: "#720a24" }}
+            style={{ color: "#ff3366" }}
             >
               VENUES
             </h2>
