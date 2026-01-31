@@ -343,7 +343,7 @@ export default function Checkout() {
                       <span className="font-medium">{formatMoney(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-gray-700">
-                      <span>Service Fee</span>
+                      <span>Tax</span>
                       <span className="font-medium">{formatMoney(serviceFee)}</span>
                     </div>
                     <div className="flex justify-between text-gray-900 text-lg font-bold mt-2">
