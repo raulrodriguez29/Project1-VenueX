@@ -38,17 +38,22 @@ export default function Notifications({}) {
   </div>
   {/* Notifications List */}
   <div className="space-y-4">
-    <ul>
-      {notifications.map((notification) => (
-        <li 
-        key={notification.id}
-        data-notification-id={notification.id}>
-          <NotificationCard
-            notification={notification}
-          />
-        </li>
-      ))}
-    </ul>
+    {notifications.length === 0 ? (
+      <p className="text-center text-gray-700">
+        You're all caught up! No new notifications.
+      </p>
+    ) : (
+      <ul>
+        {notifications.map((notification) => (
+          <li
+            key={notification.id}
+            data-notification-id={notification.id}
+          >
+            <NotificationCard notification={notification} />
+          </li>
+        ))}
+      </ul>
+    )}
   </div>
     </Blank>
     <Footer />

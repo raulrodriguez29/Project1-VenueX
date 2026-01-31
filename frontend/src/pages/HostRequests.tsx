@@ -39,18 +39,22 @@ export default function HostRequests() {
     </div>
     {/* Host Requests List */}
     <div className="space-y-4">
+      {hostRequests.length === 0 ? (
+        <p className="text-center text-gray-700">
+          You're all caught up! No new host requests.
+        </p>
+      ) : (
         <ul>
           {hostRequests.map((hostRequest) => (
             <li
-            data-hostRequest-id={hostRequest.id}
-            className="notification-card rounded-xl p-6"
-          >
-            <HostRequestCard
-              hostRequest={hostRequest}
-            />
+              key={hostRequest.id}
+              data-hostRequest-id={hostRequest.id}
+            >
+              <HostRequestCard hostRequest={hostRequest} />
             </li>
           ))}
         </ul>
+      )}
     </div>
     </Blank>
     <Footer />
