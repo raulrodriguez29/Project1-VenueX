@@ -52,7 +52,7 @@ public class EventService {
     public List<EventDTO> getEvents(Integer venueId, String name) {
         eventCleanupService.cleanupExpiredEvents();
         if (name != null && !name.isBlank()) {
-            name = "%" + name.toLowerCase() + "%"; 
+            name = "%" + name.toUpperCase() + "%"; 
         } else {name = null;}
         List<Event> events = eventRepository.findEventsByFilters(venueId, name);
     
@@ -107,7 +107,7 @@ public class EventService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         event.setCreatedBy(user);
 
-        if(eventRepository.existsByName(event.getName().toLowerCase())) {
+        if(eventRepository.existsByName(event.getName().toUpperCase())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Event already exists");
         }
 
@@ -120,7 +120,7 @@ public class EventService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,"This venue already has a concert scheduled for that day");
         }
 
-        if (event.getName() != null) event.setName(event.getName().toLowerCase());
+        if (event.getName() != null) event.setName(event.getName().toUpperCase());
         if (event.getDescription() != null) event.setDescription(event.getDescription().toLowerCase());
         Event saved = eventRepository.save(event);
         eventStatus(saved.getId());
@@ -138,7 +138,7 @@ public class EventService {
         }
         //name
         if (event.getName() != null) {
-            String newName = event.getName().toLowerCase();
+            String newName = event.getName().toUpperCase();
             if (!existingEvent.getName().equals(newName) && eventRepository.existsByName(newName)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Event already exists");
             }

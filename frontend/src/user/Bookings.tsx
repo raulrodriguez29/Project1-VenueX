@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getUserBookings, type BookingReturnDTO } from "../api/bookings.api";
+import React from "react";
+import { getTicketsForBooking, type TicketReturnDTO } from "../api/tickets.api";
 
 export default function Bookings() {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ export default function Bookings() {
   const parsedBookingId = bookingIdParam ? Number(bookingIdParam) : undefined;
 
   const [bookings, setBookings] = useState<BookingReturnDTO[]>([]);
+  const [ticketsByBooking, setTicketsByBooking] = useState<Record<number, TicketReturnDTO[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,9 +25,24 @@ export default function Bookings() {
       setError(null);
       setLoading(true);
       try {
-        // IMPORTANT: backend returns ALL bookings; filter happens client-side
         const data = await getUserBookings();
-        setBookings(data);
+        
+        // Load tickets for ALL bookings automatically
+        const bookingsWithTickets = await Promise.all(
+          data.map(async (booking) => {
+            try {
+              const tickets = await getTicketsForBooking(booking.id);
+              setTicketsByBooking(prev => ({ ...prev, [booking.id]: tickets }));
+              return booking;
+            } catch (err) {
+              console.error(`Failed to load tickets for booking ${booking.id}:`, err);
+              setTicketsByBooking(prev => ({ ...prev, [booking.id]: [] }));
+              return booking;
+            }
+          })
+        );
+        
+        setBookings(bookingsWithTickets);
       } catch (e: any) {
         const status = e?.response?.status;
         if (status === 401) setError("Please log in to view your bookings.");
@@ -95,14 +113,12 @@ export default function Bookings() {
                 onClick={() => {
                   const n = Number(bookingIdInput);
 
-                  // empty input -> remove filter
                   if (!bookingIdInput.trim()) {
                     params.delete("bookingId");
                     setParams(params, { replace: true });
                     return;
                   }
 
-                  // valid bookingId -> set filter
                   if (Number.isFinite(n) && n > 0) {
                     setParams({ bookingId: String(n) }, { replace: true });
                   }
@@ -151,7 +167,7 @@ export default function Bookings() {
             </div>
           )}
 
-          {/* Table */}
+          {/* Table -with tickets*/}
           {!loading && !error && formatted.length > 0 && (
             <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
               <table className="w-full">
@@ -166,15 +182,47 @@ export default function Bookings() {
                 </thead>
                 <tbody>
                   {formatted.map((b) => (
-                    <tr key={b.id} className="border-b last:border-b-0">
-                      <td className="p-4 text-gray-800 font-medium">{b.id}</td>
-                      <td className="p-4 text-gray-700">{b.userName}</td>
-                      <td className="p-4 text-gray-700">{b.eventName}</td>
-                      <td className="p-4 text-gray-700">{b.bookedAtPretty}</td>
-                      <td className="p-4 font-semibold" style={{ color: "#ff3366" }}>
-                        ${Number(b.totalAmount).toFixed(2)}
-                      </td>
-                    </tr>
+                    <React.Fragment key={b.id}>
+                      {/* Main booking row */}
+                      <tr className="border-b hover:bg-gray-50">
+                        <td className="p-4 text-gray-800 font-medium">{b.id}</td>
+                        <td className="p-4 text-gray-700">{b.userName}</td>
+                        <td className="p-4 text-gray-700">{b.eventName}</td>
+                        <td className="p-4 text-gray-700">{b.bookedAtPretty}</td>
+                        <td className="p-4 font-semibold" style={{ color: "#ff3366" }}>
+                          ${Number(b.totalAmount).toFixed(2)}
+                        </td>
+                      </tr>
+
+                      {/* Tickets always show underneath */}
+                      {ticketsByBooking[b.id]?.length ? (
+                        <>
+                          <tr>
+                            <td colSpan={5} className="p-0">
+                              <div className="bg-gray-50 border-t border-gray-200">
+                                <div className="px-4 py-2 border-b border-gray-100">
+                                  <h4 className="font-semibold text-gray-800 text-sm">
+                                    Tickets ({ticketsByBooking[b.id].length})
+                                  </h4>
+                                </div>
+                                <div className="divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                                  {ticketsByBooking[b.id].map((ticket) => (
+                                    <div 
+                                      key={ticket.id} 
+                                      className="px-4 py-2 grid grid-cols-[auto_1fr_auto] gap-4 text-xs items-center"
+                                    >
+                                      <span className="font-medium text-gray-700 min-w-[50px]">Section:</span>
+                                      <span className="text-gray-800">{ticket.seatSections}</span>
+                                      <span className="font-semibold text-[#ff3366]">${ticket.price.toFixed(2)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      ) : null}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

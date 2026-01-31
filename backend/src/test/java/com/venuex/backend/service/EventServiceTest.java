@@ -136,14 +136,14 @@ public class EventServiceTest {
         when(userRepository.findByEmail("temp@gmail.com"))
             .thenReturn(Optional.of(user));
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(eventRepository.existsByName("temp event")).thenReturn(false);
+        when(eventRepository.existsByName("TEMP EVENT")).thenReturn(false);
         when(eventRepository.save(any(Event.class))).thenReturn(event);
         
 
         EventDTO result = eventService.addEvent(event, "temp@gmail.com");
 
         assertNotNull(result);
-        assertEquals("temp event", result.getName());
+        assertEquals("TEMP EVENT", result.getName());
         assertEquals("temp venue", result.getVenueName());
 
         verify(eventRepository, times(2)).save(event);
@@ -169,7 +169,7 @@ public class EventServiceTest {
         when(venueRepository.findById(1)).thenReturn(Optional.of(venue));
         when(userRepository.findByEmail("temp@gmail.com"))
             .thenReturn(Optional.of(user));
-        when(eventRepository.existsByName("temp event")).thenReturn(false);
+        when(eventRepository.existsByName("TEMP EVENT")).thenReturn(false);
         when(eventRepository.existsEventOnDay(anyInt(), any(), any())).thenReturn(true);
 
         ResponseStatusException ex =
@@ -189,12 +189,12 @@ public class EventServiceTest {
         event.setDescription("old desc");
 
         Event update = new Event();
-        update.setName("New Event Name");
+        update.setName("NEW EVENT NAME");
         update.setDescription("New Description");
         update.setStartTime(LocalDateTime.now().plusDays(3).withHour(19));
 
         when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-        when(eventRepository.existsByName("new event name")).thenReturn(false);
+        when(eventRepository.existsByName("NEW EVENT NAME")).thenReturn(false);
         when(eventRepository.existsEventOnDayExcludingEvent(anyInt(), any(), any(), eq(1)))
             .thenReturn(false);
         when(eventRepository.save(any(Event.class))).thenReturn(event);
@@ -203,9 +203,9 @@ public class EventServiceTest {
         EventDTO result = eventService.updateEvent(1, update, "temp@gmail.com", "HOST");
 
         assertNotNull(result);
-        assertEquals("new event name", result.getName());
+        assertEquals("NEW EVENT NAME", result.getName());
         verify(eventRepository, times(2)).findById(1);
-        verify(eventRepository, times(1)).existsByName("new event name");
+        verify(eventRepository, times(1)).existsByName("NEW EVENT NAME");
     }
 
     @Test
