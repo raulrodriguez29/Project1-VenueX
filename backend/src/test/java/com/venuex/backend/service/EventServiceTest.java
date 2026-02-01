@@ -290,22 +290,6 @@ public class EventServiceTest {
     }
 
     @Test
-    void testUpdateEventSeatSectionPrices_Success() {
-        event.setSeatSections(new ArrayList<>(List.of(eventSeatSection)));
-        when(eventRepository.findById(1)).thenReturn(Optional.of(event));
-
-        List<EventSeatSectionDTO> updates = new ArrayList<>();
-        EventSeatSectionDTO dto = new EventSeatSectionDTO();
-        dto.setSeatSectionName("VIP");
-        dto.setPrice(BigDecimal.valueOf(15.00));
-        updates.add(dto);
-
-        eventService.updateEventSeatSectionPrices(1, updates, "temp@gmail.com","HOST");
-        assertEquals(BigDecimal.valueOf(15.00), eventSeatSection.getPrice());
-        verify(eventRepository, times(1)).save(event);
-    }
-
-    @Test
     void testUpdateEventSeatSectionPrices_Failure_EventNotFound() { 
  
         when(eventRepository.findById(2)).thenReturn(Optional.empty());

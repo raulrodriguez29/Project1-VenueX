@@ -237,7 +237,12 @@ public class EventService {
                 .findFirst();
 
             if (existingSectionOpt.isPresent()) {
-                existingSectionOpt.get().setPrice(dto.getPrice());
+                EventSeatSection existingSection = existingSectionOpt.get();
+                if (dto.getPrice().compareTo(existingSection.getPrice()) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot increase price for seat section: ");
+                }
+            existingSection.setPrice(dto.getPrice());
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Seat section not found: ");
             }
