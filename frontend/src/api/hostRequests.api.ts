@@ -6,7 +6,7 @@ export const createHostRequest = (hostRequest: Partial<HostRequest>) =>
 
 // ADMIN
 export const getAllHostRequests = () =>
-  api.get<HostRequest[]>(`/admin/hosts/request`);
+  api.get<HostRequest[]>(`/admin/hosts/requests`);
 
 export const approveHostRequest = (
   hostRequestId: number,
